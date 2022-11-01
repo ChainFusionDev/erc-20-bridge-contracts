@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
-import { deploySystem, deployBridgeWithMocks } from '../utils/deploy';
+import { deploySystem, deployBridgeWithMocks, deploySystemWithMocks } from '../utils/deploy';
 import { ethers } from 'hardhat';
 
 describe('ERC20BridgeMediator', function () {
@@ -11,7 +11,7 @@ describe('ERC20BridgeMediator', function () {
     const token1 = '0x0000000000000000000000000000000000000001';
     const token2 = '0x0000000000000000000000000000000000000002';
 
-    const { erc20BridgeMediator } = await deploySystem();
+    const { erc20BridgeMediator } = await deploySystemWithMocks();
 
     await expect(await erc20BridgeMediator.addToken(symbol1, chainId, token1))
       .to.emit(erc20BridgeMediator, 'AddedToken')
@@ -35,7 +35,7 @@ describe('ERC20BridgeMediator', function () {
     const token = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
     const tokenZero = '0x0000000000000000000000000000000000000000';
 
-    const { erc20BridgeMediator } = await deploySystem();
+    const { erc20BridgeMediator } = await deploySystemWithMocks();
 
     await erc20BridgeMediator.addToken(symbol, chainId, token);
 
@@ -57,7 +57,7 @@ describe('ERC20BridgeMediator', function () {
     const chainId = 111;
     const token = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
 
-    const { erc20BridgeMediator } = await deploySystem();
+    const { erc20BridgeMediator } = await deploySystemWithMocks();
 
     const systemUser = await ethers.getContractAt('ERC20BridgeMediator', erc20BridgeMediator.address, user);
     await expect(systemUser.addToken(symbol, chainId, token)).to.be.revertedWith('Ownable: caller is not the owner');
@@ -72,7 +72,7 @@ describe('ERC20BridgeMediator', function () {
     const destinationChain = 222;
     const destinationToken = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
 
-    const { erc20BridgeMediator } = await deploySystem();
+    const { erc20BridgeMediator } = await deploySystemWithMocks();
     const { mockChainId, mockToken } = await deployBridgeWithMocks();
 
     const abiCoder = ethers.utils.defaultAbiCoder;

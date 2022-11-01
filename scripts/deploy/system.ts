@@ -23,10 +23,10 @@ export async function deploySystemContracts(options?: SystemDeploymentOptions): 
     erc20BridgeMediator: await deployer.deploy(ethers.getContractFactory('ERC20BridgeMediator'), 'ERC20BridgeMediator'),
   };
 
-  const bridgeAppFactory = await ethers.getContractAt('IBridgeAppFactory', options!.bridgeAppFactory!);
-  await bridgeAppFactory.createApp(), 'Creating BridgeApp';
-  const bridgeApp = await ethers.getContractAt('BridgeApp', options!.bridgeAppFactory!);
-  await deployer.sendTransaction(bridgeApp.setMediator(res.erc20BridgeMediator.address), 'Setting BridgeMediator to BridgeApp');
+  const bridgeAppFactory = await ethers.getContractAt('IBridgeAppFactory', params.bridgeAppFactory);
+  await bridgeAppFactory.createApp();
+  const bridgeApp = await ethers.getContractAt('IBridgeApp', await bridgeAppFactory.getAppAddress(0));
+  await bridgeApp.setMediator(res.erc20BridgeMediator.address);
 
   deployer.log('Successfully deployed contracts\n');
 
