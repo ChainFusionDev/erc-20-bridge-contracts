@@ -15,10 +15,7 @@ contract MockBridgeApp is Ownable {
         _transferOwnership(_owner);
     }
 
-    function setContractAddress(uint256 chainId, address contractAddress)
-        public
-        onlyOwner
-    {
+    function setContractAddress(uint256 chainId, address contractAddress) public onlyOwner {
         contractAddresses[chainId] = contractAddress;
         emit ContractAddressUpdated(chainId, contractAddress);
     }

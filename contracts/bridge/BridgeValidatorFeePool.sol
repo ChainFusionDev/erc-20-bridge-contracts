@@ -32,18 +32,12 @@ contract BridgeValidatorFeePool is Initializable, SignerOwnable {
         setValidatorFeeReceiver(_validatorFeeReceiver);
     }
 
-    function setValidatorFeeReceiver(address _validatorFeeReceiver)
-        public
-        onlySigner
-    {
+    function setValidatorFeeReceiver(address _validatorFeeReceiver) public onlySigner {
         validatorFeeReceiver = _validatorFeeReceiver;
         emit ValidatorFeeReceiverUpdated(_validatorFeeReceiver);
     }
 
-    function setLimitPerToken(address _token, uint256 _limit)
-        public
-        onlySigner
-    {
+    function setLimitPerToken(address _token, uint256 _limit) public onlySigner {
         limitPerToken[_token] = _limit;
         emit LimitPerTokenUpdated(_token, _limit);
     }
@@ -54,40 +48,23 @@ contract BridgeValidatorFeePool is Initializable, SignerOwnable {
     }
 
     function collect(address _token) public {
-        require(
-            limitPerToken[_token] > 0,
-            "BridgeValidatorFeePool: no limit for this token"
-        );
+        require(limitPerToken[_token] > 0, "BridgeValidatorFeePool: no limit for this token");
 
         uint256 balanceAmount;
 
         if (_token == NATIVE_TOKEN) {
             balanceAmount = address(this).balance;
 
-            require(
-                limitPerToken[_token] < balanceAmount,
-                "BridgeValidatorFeePool: insufficient funds"
-            );
-            erc20Bridge.depositNative{value: balanceAmount}(
-                block.chainid,
-                validatorFeeReceiver
-            );
+            require(limitPerToken[_token] < balanceAmount, "BridgeValidatorFeePool: insufficient funds");
+            erc20Bridge.depositNative{value: balanceAmount}(block.chainid, validatorFeeReceiver);
         } else {
             balanceAmount = IERC20(_token).balanceOf(address(this));
 
-            require(
-                limitPerToken[_token] < balanceAmount,
-                "BridgeValidatorFeePool: insufficient funds"
-            );
+            require(limitPerToken[_token] < balanceAmount, "BridgeValidatorFeePool: insufficient funds");
 
             IERC20(_token).approve(address(erc20Bridge), balanceAmount);
 
-            erc20Bridge.deposit(
-                _token,
-                block.chainid,
-                validatorFeeReceiver,
-                balanceAmount
-            );
+            erc20Bridge.deposit(_token, block.chainid, validatorFeeReceiver, balanceAmount);
         }
 
         emit Collected(_token, balanceAmount);

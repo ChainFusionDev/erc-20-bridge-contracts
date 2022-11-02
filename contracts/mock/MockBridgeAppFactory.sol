@@ -8,6 +8,12 @@ contract MockBridgeAppFactory {
 
     event BridgeAppCreated(address contractAddress, address owner);
 
+    function getAppAddress(uint256 appId) external view returns (address) {
+        require(apps.length != 0, "BridgeAppFactory: apps cannot be empty");
+
+        return apps[appId];
+    }
+
     function createApp() public returns (MockBridgeApp) {
         MockBridgeApp bridgeApp = new MockBridgeApp(msg.sender);
         apps.push(address(bridgeApp));
@@ -15,11 +21,5 @@ contract MockBridgeAppFactory {
         emit BridgeAppCreated(address(bridgeApp), msg.sender);
 
         return bridgeApp;
-    }
-
-    function getAppAddress(uint256 appId) external view returns (address) {
-        require(apps.length != 0, "BridgeAppFactory: apps cannot be empty");
-
-        return apps[appId];
     }
 }

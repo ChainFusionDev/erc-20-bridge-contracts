@@ -1,12 +1,10 @@
 import { ethers } from 'hardhat';
 import { Deployer } from './deployer';
 
-import {
-  ERC20BridgeMediator,
-} from '../../typechain';
+import { ERC20BridgeMediator } from '../../typechain';
 
 const defaultSystemDeploymentParameters: SystemDeploymentParameters = {
-  bridgeAppFactory: '0xcB0f2a13098f8e841e6Adfa5B17Ec00508b27665',
+  bridgeAppFactory: '0xe47F0396CfCB8134A791246924171950f1a83053',
 
   displayLogs: false,
   verify: false,
@@ -25,7 +23,7 @@ export async function deploySystemContracts(options?: SystemDeploymentOptions): 
 
   const bridgeAppFactory = await ethers.getContractAt('IBridgeAppFactory', params.bridgeAppFactory);
   await bridgeAppFactory.createApp();
-  const bridgeApp = await ethers.getContractAt('IBridgeApp', await bridgeAppFactory.getAppAddress(0));
+  const bridgeApp = await ethers.getContractAt('IBridgeApp', await bridgeAppFactory.apps(0));
   await bridgeApp.setMediator(res.erc20BridgeMediator.address);
 
   deployer.log('Successfully deployed contracts\n');
@@ -58,7 +56,7 @@ function resolveParameters(options?: SystemDeploymentOptions): SystemDeploymentP
   return parameters;
 }
 
-export interface SystemDeploymentResult extends SystemDeployment, SystemDeploymentParameters { }
+export interface SystemDeploymentResult extends SystemDeployment, SystemDeploymentParameters {}
 
 export interface SystemDeployment {
   erc20BridgeMediator: ERC20BridgeMediator;

@@ -6,7 +6,7 @@ import {
   BridgeValidatorFeePool,
   LiquidityPools,
   SignerStorage,
-  TokenManager
+  TokenManager,
 } from '../../typechain';
 import { Deployer } from './deployer';
 
@@ -137,7 +137,7 @@ function resolveParameters(options?: BridgeDeploymentOptions): BridgeDeploymentP
   return parameters;
 }
 
-export interface BridgeDeploymentResult extends BridgeDeployment, BridgeDeploymentParameters { }
+export interface BridgeDeploymentResult extends BridgeDeployment, BridgeDeploymentParameters {}
 
 export interface BridgeDeployment {
   signerStorage: SignerStorage;

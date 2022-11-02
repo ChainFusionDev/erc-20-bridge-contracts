@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
-import { deploySystem, deployBridgeWithMocks, deploySystemWithMocks } from '../utils/deploy';
+import { deployBridgeWithMocks, deploySystemWithMocks } from '../utils/deploy';
 import { ethers } from 'hardhat';
 
 describe('ERC20BridgeMediator', function () {

@@ -34,29 +34,13 @@ contract MockRelayBridge is IRelayBridge {
         uint256 gasLimit,
         bytes memory data
     ) external payable {
-        bytes32 hash = dataHash(
-            msg.sender,
-            block.chainid,
-            destinationChain,
-            gasLimit,
-            data,
-            nonce
-        );
+        bytes32 hash = dataHash(msg.sender, block.chainid, destinationChain, gasLimit, data, nonce);
         require(sentData[hash].length == 0, "RelayBridge: data already send");
 
         sent[hash] = true;
         sentData[hash] = data;
 
-        emit Sent(
-            hash,
-            msg.sender,
-            block.chainid,
-            destinationChain,
-            data,
-            gasLimit,
-            nonce,
-            msg.value
-        );
+        emit Sent(hash, msg.sender, block.chainid, destinationChain, data, gasLimit, nonce, msg.value);
 
         nonce++;
     }
@@ -69,14 +53,7 @@ contract MockRelayBridge is IRelayBridge {
         uint256 _nonce,
         address
     ) external {
-        bytes32 hash = dataHash(
-            appContract,
-            block.chainid,
-            destinationChain,
-            gasLimit,
-            data,
-            _nonce
-        );
+        bytes32 hash = dataHash(appContract, block.chainid, destinationChain, gasLimit, data, _nonce);
         require(sent[hash], "RelayBridge: data never sent");
         require(!reverted[hash], "RelayBridge: data already reverted");
 
@@ -93,14 +70,7 @@ contract MockRelayBridge is IRelayBridge {
         uint256 _nonce,
         address
     ) external {
-        bytes32 hash = dataHash(
-            appContract,
-            sourceChain,
-            block.chainid,
-            gasLimit,
-            data,
-            _nonce
-        );
+        bytes32 hash = dataHash(appContract, sourceChain, block.chainid, gasLimit, data, _nonce);
         require(!executed[hash], "RelayBridge: data already executed");
 
         executed[hash] = true;
@@ -120,16 +90,6 @@ contract MockRelayBridge is IRelayBridge {
         bytes memory data,
         uint256 _nonce
     ) public pure returns (bytes32) {
-        return
-            keccak256(
-                abi.encode(
-                    appContract,
-                    sourceChain,
-                    destinationChain,
-                    gasLimit,
-                    data,
-                    _nonce
-                )
-            );
+        return keccak256(abi.encode(appContract, sourceChain, destinationChain, gasLimit, data, _nonce));
     }
 }
