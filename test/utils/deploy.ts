@@ -2,7 +2,13 @@ import { ethers } from 'hardhat';
 import { BigNumber } from 'ethers';
 import { deploySystemContracts, SystemDeploymentOptions, SystemDeploymentResult } from '../../scripts/deploy/system';
 import { BridgeDeploymentOptions, BridgeDeploymentResult, deployBridgeContracts } from '../../scripts/deploy/chain';
-import { MockMintableBurnableToken, MockToken, ERC20Bridgeable, MockRelayBridge } from '../../typechain';
+import {
+  MockMintableBurnableToken,
+  MockToken,
+  ERC20Bridgeable,
+  MockRelayBridge,
+  MockBridgeAppFactory,
+} from '../../typechain';
 
 export async function deploySystem(options?: SystemDeploymentOptions): Promise<SystemDeploymentResult> {
   return await deploySystemContracts(options);
@@ -57,10 +63,36 @@ export async function deployBridgeWithMocks(
   };
 }
 
+export async function deploySystemWithMocks(
+  options?: SystemDeploymentOptions
+): Promise<SystemWithMocksDeploymentResult> {
+  const MockBridgeAppFactory = await ethers.getContractFactory('MockBridgeAppFactory');
+  const mockBridgeAppFactory = await MockBridgeAppFactory.deploy();
+  await mockBridgeAppFactory.deployed();
+
+  if (options === undefined) {
+    options = {};
+  }
+
+  if (options.bridgeAppFactory === undefined) {
+    options.bridgeAppFactory = mockBridgeAppFactory.address;
+  }
+
+  const deployment = await deploySystemContracts(options);
+
+  return {
+    mockBridgeAppFactory: mockBridgeAppFactory,
+    ...deployment,
+  };
+}
 export interface BridgeWithMocksDeploymentResult extends BridgeDeploymentResult {
   mockChainId: BigNumber;
   mockToken: MockToken;
   mockMintableBurnableToken: MockMintableBurnableToken;
   erc20Bridgeable: ERC20Bridgeable;
   mockRelayBridge: MockRelayBridge;
+}
+
+export interface SystemWithMocksDeploymentResult extends SystemDeploymentResult {
+  mockBridgeAppFactory: MockBridgeAppFactory;
 }

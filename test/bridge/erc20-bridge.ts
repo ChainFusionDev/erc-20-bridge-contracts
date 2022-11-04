@@ -97,7 +97,14 @@ describe('ERC20Bridge', function () {
       [sender.address, NATIVE_TOKEN, mockChainId, receiver.address, transferAmount]
     );
 
-    const hashToken = await mockRelayBridge.dataHash(erc20Bridge.address, sourceChainId, mockChainId, gasLimit, data, 0);
+    const hashToken = await mockRelayBridge.dataHash(
+      erc20Bridge.address,
+      sourceChainId,
+      mockChainId,
+      gasLimit,
+      data,
+      0
+    );
 
     const hashMintToken = await mockRelayBridge.dataHash(
       erc20Bridge.address,
@@ -166,7 +173,9 @@ describe('ERC20Bridge', function () {
     const nativeLiquidityBalanceBeforeDeposit = await ethers.provider.getBalance(liquidityPools.address);
 
     const nativeDepositTx = await (
-      await erc20Bridge.depositNative(mockChainId, receiver.address, { value: depositAmount })
+      await erc20Bridge.depositNative(mockChainId, receiver.address, {
+        value: depositAmount,
+      })
     ).wait();
     const depositTxFee = nativeDepositTx.gasUsed.mul(nativeDepositTx.effectiveGasPrice);
 
@@ -179,20 +188,18 @@ describe('ERC20Bridge', function () {
 
     const nativeSenderBalanceBeforeRevert = await ethers.provider.getBalance(sender.address);
 
-    const nativeSetRelayTx = await (
-      await erc20Bridge.setRelayBridge(sender.address)
-    ).wait();
+    const nativeSetRelayTx = await (await erc20Bridge.setRelayBridge(sender.address)).wait();
     const setRelayTxFee = nativeSetRelayTx.gasUsed.mul(nativeSetRelayTx.effectiveGasPrice);
 
-    const nativeRevertTx = await (
-      await erc20Bridge.revertSend(mockChainId, dataNativeToken)
-    ).wait();
+    const nativeRevertTx = await (await erc20Bridge.revertSend(mockChainId, dataNativeToken)).wait();
     const revertTxFee = nativeRevertTx.gasUsed.mul(nativeRevertTx.effectiveGasPrice);
 
     expect(await mockRelayBridge.sent(hashNativeToken)).to.equals(true);
 
     const nativeSenderBalanceAfterRevert = await ethers.provider.getBalance(sender.address);
-    const nativeExpectedBalanceRevert = nativeSenderBalanceBeforeRevert.add(transferAmount.sub(revertTxFee).sub(setRelayTxFee));
+    const nativeExpectedBalanceRevert = nativeSenderBalanceBeforeRevert.add(
+      transferAmount.sub(revertTxFee).sub(setRelayTxFee)
+    );
     expect(nativeSenderBalanceAfterRevert).to.equal(nativeExpectedBalanceRevert);
   });
 
@@ -214,17 +221,21 @@ describe('ERC20Bridge', function () {
     await tokenManager.setToken(NATIVE_TOKEN, 1);
     expect(await tokenManager.getType(NATIVE_TOKEN)).to.equal(1);
     await liquidityPools.addNativeLiquidity({ value: depositAmount });
-    await erc20Bridge.depositNative(mockChainId, receiver.address, { value: depositAmount });
+    await erc20Bridge.depositNative(mockChainId, receiver.address, {
+      value: depositAmount,
+    });
 
     await hre.network.provider.request({
-      method: "hardhat_impersonateAccount",
+      method: 'hardhat_impersonateAccount',
       params: [mockRelayBridge.address],
     });
     const signer = await ethers.getSigner(mockRelayBridge.address);
-    await (await sender.sendTransaction({
-      to: signer.address,
-      value: ethers.utils.parseEther('1'),
-    })).wait();
+    await (
+      await sender.sendTransaction({
+        to: signer.address,
+        value: ethers.utils.parseEther('1'),
+      })
+    ).wait();
 
     await expect(erc20Bridge.connect(signer).revertSend(mockChainId, dataNativeToken))
       .emit(erc20Bridge, 'Reverted')
@@ -259,14 +270,16 @@ describe('ERC20Bridge', function () {
     await expect(bridgeUser.execute(erc20Bridge.address, data)).to.be.revertedWith('ERC20Bridge: only RelayBridge');
 
     await hre.network.provider.request({
-      method: "hardhat_impersonateAccount",
+      method: 'hardhat_impersonateAccount',
       params: [mockRelayBridge.address],
     });
     const signer = await ethers.getSigner(mockRelayBridge.address);
-    await (await sender.sendTransaction({
-      to: signer.address,
-      value: ethers.utils.parseEther('1'),
-    })).wait();
+    await (
+      await sender.sendTransaction({
+        to: signer.address,
+        value: ethers.utils.parseEther('1'),
+      })
+    ).wait();
 
     await erc20Bridge.connect(signer).execute(mockChainId, data);
 
@@ -301,14 +314,16 @@ describe('ERC20Bridge', function () {
     await erc20Bridge.deposit(mockToken.address, mockChainId, receiver.address, depositAmount);
 
     await hre.network.provider.request({
-      method: "hardhat_impersonateAccount",
+      method: 'hardhat_impersonateAccount',
       params: [mockRelayBridge.address],
     });
     const signer = await ethers.getSigner(mockRelayBridge.address);
-    await (await sender.sendTransaction({
-      to: signer.address,
-      value: ethers.utils.parseEther('1'),
-    })).wait();
+    await (
+      await sender.sendTransaction({
+        to: signer.address,
+        value: ethers.utils.parseEther('1'),
+      })
+    ).wait();
 
     await expect(erc20Bridge.connect(signer).execute(mockChainId, data))
       .to.emit(erc20Bridge, 'Transferred')
@@ -357,14 +372,16 @@ describe('ERC20Bridge', function () {
     await mockMintableBurnableToken.transferOwnership(erc20Bridge.address);
 
     await hre.network.provider.request({
-      method: "hardhat_impersonateAccount",
+      method: 'hardhat_impersonateAccount',
       params: [mockRelayBridge.address],
     });
     const signer = await ethers.getSigner(mockRelayBridge.address);
-    await (await sender.sendTransaction({
-      to: signer.address,
-      value: ethers.utils.parseEther('1'),
-    })).wait();
+    await (
+      await sender.sendTransaction({
+        to: signer.address,
+        value: ethers.utils.parseEther('1'),
+      })
+    ).wait();
 
     await expect(erc20Bridge.connect(signer).execute(mockChainId, dataMintableToken))
       .to.emit(mockMintableBurnableToken, 'Transfer')
@@ -399,21 +416,27 @@ describe('ERC20Bridge', function () {
     await liquidityPools.addNativeLiquidity({ value: depositAmount });
 
     await expect(
-      erc20Bridge.depositNative(mockChainId, receiver.address, { value: depositAmountZero })
+      erc20Bridge.depositNative(mockChainId, receiver.address, {
+        value: depositAmountZero,
+      })
     ).to.be.revertedWith('ERC20Bridge: amount cannot be equal to 0.');
-    await erc20Bridge.depositNative(mockChainId, receiver.address, { value: depositAmount });
+    await erc20Bridge.depositNative(mockChainId, receiver.address, {
+      value: depositAmount,
+    });
 
     const balanceReceiverBefore = await ethers.provider.getBalance(receiver.address);
 
     await hre.network.provider.request({
-      method: "hardhat_impersonateAccount",
+      method: 'hardhat_impersonateAccount',
       params: [mockRelayBridge.address],
     });
     const signer = await ethers.getSigner(mockRelayBridge.address);
-    await (await sender.sendTransaction({
-      to: signer.address,
-      value: ethers.utils.parseEther('1'),
-    })).wait();
+    await (
+      await sender.sendTransaction({
+        to: signer.address,
+        value: ethers.utils.parseEther('1'),
+      })
+    ).wait();
 
     await erc20Bridge.connect(signer).execute(mockChainId, data);
 

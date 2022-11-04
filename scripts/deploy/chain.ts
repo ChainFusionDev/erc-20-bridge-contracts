@@ -6,16 +6,16 @@ import {
   BridgeValidatorFeePool,
   LiquidityPools,
   SignerStorage,
-  TokenManager
+  TokenManager,
 } from '../../typechain';
 import { Deployer } from './deployer';
 
 const defaultBridgeDeploymentParameters: BridgeDeploymentParameters = {
   feePercentage: BigNumber.from('10000000000000000'),
   validatorRefundFee: BigNumber.from('10000000000000000'),
-  foundationAddress: '0xd13F66863ED91704e386C57501F00b5307CAbA18',
-  bridgeAppAddress: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-  relayBridge: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+  foundationAddress: '0x0000000000000000000000000000000000000001',
+  bridgeAppAddress: '0x0000000000000000000000000000000000000001',
+  relayBridge: '0x0000000000000000000000000000000000000001',
 
   displayLogs: false,
   verify: false,
@@ -137,7 +137,7 @@ function resolveParameters(options?: BridgeDeploymentOptions): BridgeDeploymentP
   return parameters;
 }
 
-export interface BridgeDeploymentResult extends BridgeDeployment, BridgeDeploymentParameters { }
+export interface BridgeDeploymentResult extends BridgeDeployment, BridgeDeploymentParameters {}
 
 export interface BridgeDeployment {
   signerStorage: SignerStorage;

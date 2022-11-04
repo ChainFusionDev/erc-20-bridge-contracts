@@ -43,7 +43,9 @@ describe('FeeManager', function () {
     await bridgeValidatorFeePool.setLimitPerToken(NATIVE_TOKEN, tokenLimit);
 
     await liquidityPools.addNativeLiquidity({ value: amount });
-    await erc20Bridge.depositNative(mockChainId, receiver.address, { value: amount });
+    await erc20Bridge.depositNative(mockChainId, receiver.address, {
+      value: amount,
+    });
 
     await feeManager.setTokenFee(NATIVE_TOKEN, tokenFee, validatorReward, liquidityReward);
 
