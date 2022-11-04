@@ -88,7 +88,9 @@ describe('BridgeValidatorFeePool', function () {
     expect(await bridgeValidatorFeePool.limitPerToken(NATIVE_TOKEN)).to.be.equal(tokenLimit);
     expect(await bridgeValidatorFeePool.limitPerToken(mockToken.address)).to.be.equal(tokenLimit);
 
-    await erc20Bridge.depositNative(mockChainId, receiver.address, { value: depositAmount });
+    await erc20Bridge.depositNative(mockChainId, receiver.address, {
+      value: depositAmount,
+    });
     await erc20Bridge.deposit(mockToken.address, mockChainId, receiver.address, depositAmount);
 
     await feeManager.distributeRewards(NATIVE_TOKEN);

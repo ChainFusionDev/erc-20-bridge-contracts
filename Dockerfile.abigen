@@ -1,0 +1,19 @@
+FROM ethereum/client-go:alltools-v1.10.17
+
+WORKDIR /
+
+COPY artifacts/ artifacts/
+
+RUN mkdir bridge
+RUN mkdir system
+
+# Bridge contracts
+RUN abigen --abi artifacts/abi/bridge/BridgeValidatorFeePool.sol/BridgeValidatorFeePool.json --pkg bridge --type BridgeValidatorFeePool --out bridge/bridge-validator-fee-pool.go
+RUN abigen --abi artifacts/abi/bridge/ERC20Bridge.sol/ERC20Bridge.json --pkg bridge --type ERC20Bridge --out bridge/erc20-bridge.go
+RUN abigen --abi artifacts/abi/bridge/FeeManager.sol/FeeManager.json --pkg bridge --type FeeManager --out bridge/fee-manager.go
+RUN abigen --abi artifacts/abi/bridge/LiquidityPools.sol/LiquidityPools.json --pkg bridge --type LiquidityPools --out bridge/liquidity-pools.go
+RUN abigen --abi artifacts/abi/bridge/SignerStorage.sol/SignerStorage.json --pkg bridge --type SignerStorage --out bridge/signer-storage.go
+RUN abigen --abi artifacts/abi/bridge/TokenManager.sol/TokenManager.json --pkg bridge --type TokenManager --out bridge/token-manager.go
+
+# System contracts
+RUN abigen --abi artifacts/abi/system/ERC20BridgeMediator.sol/ERC20BridgeMediator.json --pkg system --type ERC20BridgeMediator --out system/erc20-bridge-mediator.go

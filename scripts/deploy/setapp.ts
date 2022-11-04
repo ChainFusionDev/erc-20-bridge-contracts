@@ -1,9 +1,13 @@
 import { ethers } from 'hardhat';
 import { Deployer } from './deployer';
 
-import { ERC20BridgeMediator } from '../../typechain';
+import {} from '../../typechain';
 
 const defaultSystemDeploymentParameters: SystemDeploymentParameters = {
+  erc20Bridge: '0x5b7eFCb3ebbde03625A92C67a87c5a58F046e64f',
+  bridgeApp: '0x03080d4C8340c9b23D2fe87169B1Df8EccFE4230',
+  chainId: '953842',
+
   displayLogs: false,
   verify: false,
 };
@@ -14,17 +18,10 @@ export async function deploySystemContracts(options?: SystemDeploymentOptions): 
 
   deployer.log('Deploying contracts\n');
 
-  const res: SystemDeployment = {
-    erc20BridgeMediator: await deployer.deploy(ethers.getContractFactory('ERC20BridgeMediator'), 'ERC20BridgeMediator'),
-  };
+  const res: SystemDeployment = {};
 
-  if (params.bridgeAppFactory !== undefined) {
-    const bridgeAppFactory = await ethers.getContractAt('IBridgeAppFactory', params.bridgeAppFactory);
-    const bridgeAppAddress = await bridgeAppFactory.callStatic.createApp();
-    await (await bridgeAppFactory.createApp()).wait();
-    const bridgeApp = await ethers.getContractAt('IBridgeApp', bridgeAppAddress);
-    await bridgeApp.setMediator(res.erc20BridgeMediator.address);
-  }
+  const bridgeApp = await ethers.getContractAt('IBridgeApp', params.bridgeApp);
+  await bridgeApp.setContractAddress(params.chainId, params.erc20Bridge);
 
   deployer.log('Successfully deployed contracts\n');
 
@@ -49,8 +46,16 @@ function resolveParameters(options?: SystemDeploymentOptions): SystemDeploymentP
     return parameters;
   }
 
-  if (options.bridgeAppFactory !== undefined) {
-    parameters.bridgeAppFactory = options.bridgeAppFactory;
+  if (options.erc20Bridge !== undefined) {
+    parameters.erc20Bridge = options.erc20Bridge;
+  }
+
+  if (options.chainId !== undefined) {
+    parameters.chainId = options.chainId;
+  }
+
+  if (options.bridgeApp !== undefined) {
+    parameters.bridgeApp = options.bridgeApp;
   }
 
   return parameters;
@@ -58,19 +63,21 @@ function resolveParameters(options?: SystemDeploymentOptions): SystemDeploymentP
 
 export interface SystemDeploymentResult extends SystemDeployment, SystemDeploymentParameters {}
 
-export interface SystemDeployment {
-  erc20BridgeMediator: ERC20BridgeMediator;
-}
+export interface SystemDeployment {}
 
 export interface SystemDeploymentParameters {
-  bridgeAppFactory?: string;
+  erc20Bridge: string;
+  chainId: string;
+  bridgeApp: string;
 
   displayLogs: boolean;
   verify: boolean;
 }
 
 export interface SystemDeploymentOptions {
-  bridgeAppFactory?: string;
+  erc20Bridge?: string;
+  chainId?: string;
+  bridgeApp?: string;
 
   displayLogs?: boolean;
   verify?: boolean;

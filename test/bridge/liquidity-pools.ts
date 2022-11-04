@@ -170,11 +170,8 @@ describe('LiquidityPools', function () {
     const validatorReward = utils.parseEther('0.3');
     const liquidityReward = utils.parseEther('0.3');
     const sourceChainId = 5;
-    const gasLimit = (await ethers.provider.getBlock(0)).gasLimit;
     const transferAmount = utils.parseEther('0.99');
     const nullAddress = '0x0000000000000000000000000000000000000000';
-    const leader = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
-    const nonce = 1;
 
     const { mockChainId, mockToken, liquidityPools, erc20Bridge, feeManager, mockRelayBridge } =
       await deployBridgeWithMocks();
@@ -191,26 +188,28 @@ describe('LiquidityPools', function () {
     );
 
     await hre.network.provider.request({
-      method: "hardhat_impersonateAccount",
+      method: 'hardhat_impersonateAccount',
       params: [mockRelayBridge.address],
     });
     const signer = await ethers.getSigner(mockRelayBridge.address);
-    await (await sender.sendTransaction({
-      to: signer.address,
-      value: ethers.utils.parseEther('1'),
-    })).wait();
+    await (
+      await sender.sendTransaction({
+        to: signer.address,
+        value: ethers.utils.parseEther('1'),
+      })
+    ).wait();
 
-    await expect(
-      erc20Bridge.connect(signer).execute(mockChainId, data)
-    ).to.be.revertedWith('IERC20: amount more than contract balance');
+    await expect(erc20Bridge.connect(signer).execute(mockChainId, data)).to.be.revertedWith(
+      'IERC20: amount more than contract balance'
+    );
 
     await mockToken.approve(erc20Bridge.address, depositAmount);
     await mockToken.approve(liquidityPools.address, depositAmount);
     await liquidityPools.addLiquidity(mockToken.address, depositAmount);
 
-    await expect(
-      erc20Bridge.connect(signer).execute(mockChainId, dataNullAddress)
-    ).to.be.revertedWith('ERC20: transfer to the zero address');
+    await expect(erc20Bridge.connect(signer).execute(mockChainId, dataNullAddress)).to.be.revertedWith(
+      'ERC20: transfer to the zero address'
+    );
     await expect(feeManager.distributeRewards(mockToken.address)).to.be.revertedWith(
       'LiquidityPools: amount must be greater than zero'
     );

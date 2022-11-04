@@ -37,31 +37,16 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         uint256 fee,
         uint256 transferAmount
     );
-    event Transferred(
-        address sender,
-        address token,
-        uint256 sourceChainId,
-        address receiver,
-        uint256 amount
-    );
+    event Transferred(address sender, address token, uint256 sourceChainId, address receiver, uint256 amount);
     event RelayBridgeUpdated(address _relayBridge);
     event TokenManagerUpdated(address _tokenManager);
     event ValidatorAddressUpdated(address _validatorAddress);
     event LiquidityPoolsUpdated(address _liquidityPools);
     event FeeManagerUpdated(address _feeManager);
-    event Reverted(
-        address sender,
-        address token,
-        uint256 sourceChainId,
-        address receiver,
-        uint256 amount
-    );
+    event Reverted(address sender, address token, uint256 sourceChainId, address receiver, uint256 amount);
 
     modifier onlyRelayBridge() {
-        require(
-            msg.sender == address(relayBridge),
-            "ERC20Bridge: only RelayBridge"
-        );
+        require(msg.sender == address(relayBridge), "ERC20Bridge: only RelayBridge");
         _;
     }
 
@@ -88,16 +73,10 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         uint256 _amount
     ) external {
         require(_amount != 0, "ERC20Bridge: amount cannot be equal to 0.");
-        require(
-            tokenManager.getType(_token) != TokenType.DISABLED,
-            "TokenManager: token is not enabled"
-        );
+        require(tokenManager.getType(_token) != TokenType.DISABLED, "TokenManager: token is not enabled");
 
         uint256 fee = feeManager.calculateFee(_token, _amount);
-        require(
-            IERC20(_token).transferFrom(msg.sender, address(feeManager), fee),
-            "IERC20: transfer failed"
-        );
+        require(IERC20(_token).transferFrom(msg.sender, address(feeManager), fee), "IERC20: transfer failed");
 
         uint256 transferAmount = _amount - fee;
 
@@ -105,68 +84,35 @@ contract ERC20Bridge is Initializable, SignerOwnable {
             IERC20MintableBurnable(_token).burnFrom(msg.sender, transferAmount);
         } else {
             require(
-                IERC20(_token).transferFrom(
-                    msg.sender,
-                    address(liquidityPools),
-                    transferAmount
-                ),
+                IERC20(_token).transferFrom(msg.sender, address(liquidityPools), transferAmount),
                 "IERC20: transfer failed"
             );
         }
 
-        emit Deposited(
-            msg.sender,
-            _token,
-            _chainId,
-            _receiver,
-            fee,
-            transferAmount
-        );
+        emit Deposited(msg.sender, _token, _chainId, _receiver, fee, transferAmount);
 
-        bytes memory data = abi.encode(
-            msg.sender,
-            _token,
-            _chainId,
-            _receiver,
-            transferAmount
-        );
+        bytes memory data = abi.encode(msg.sender, _token, _chainId, _receiver, transferAmount);
 
         // solhint-disable-next-line check-send-result
         relayBridge.send(_chainId, block.gaslimit, data);
     }
 
     function execute(uint256, bytes memory data) external onlyRelayBridge {
-        (
-            address _sender,
-            address _token,
-            uint256 _chainId,
-            address _receiver,
-            uint256 transferAmount
-        ) = abi.decode(data, (address, address, uint256, address, uint256));
-
-        _executeTransfer(
-            _sender,
+        (address _sender, address _token, uint256 _chainId, address _receiver, uint256 transferAmount) = abi.decode(
             data,
-            _token,
-            _chainId,
-            _receiver,
-            transferAmount
+            (address, address, uint256, address, uint256)
         );
+
+        _executeTransfer(_sender, data, _token, _chainId, _receiver, transferAmount);
     }
 
     function revertSend(uint256, bytes memory data) external onlyRelayBridge {
-        (
-            address _sender,
-            address _token,
-            uint256 _chainId,
-            address _receiver,
-            uint256 _amount
-        ) = abi.decode(data, (address, address, uint256, address, uint256));
-
-        require(
-            tokenManager.getType(_token) != TokenType.DISABLED,
-            "TokenManager: token is not enabled"
+        (address _sender, address _token, uint256 _chainId, address _receiver, uint256 _amount) = abi.decode(
+            data,
+            (address, address, uint256, address, uint256)
         );
+
+        require(tokenManager.getType(_token) != TokenType.DISABLED, "TokenManager: token is not enabled");
 
         if (tokenManager.getType(_token) == TokenType.MINTED) {
             IERC20MintableBurnable(_token).mint(_sender, _amount);
@@ -189,10 +135,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         emit TokenManagerUpdated(_tokenManager);
     }
 
-    function setLiquidityPools(address payable _liquidityPools)
-        public
-        onlySigner
-    {
+    function setLiquidityPools(address payable _liquidityPools) public onlySigner {
         liquidityPools = LiquidityPools(_liquidityPools);
         emit LiquidityPoolsUpdated(_liquidityPools);
     }
@@ -205,10 +148,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
     function depositNative(uint256 _chainId, address _receiver) public payable {
         uint256 _amount = msg.value;
         require(_amount != 0, "ERC20Bridge: amount cannot be equal to 0.");
-        require(
-            tokenManager.getType(NATIVE_TOKEN) == TokenType.PROVIDED,
-            "TokenManager: token is not enabled"
-        );
+        require(tokenManager.getType(NATIVE_TOKEN) == TokenType.PROVIDED, "TokenManager: token is not enabled");
 
         uint256 fee = feeManager.calculateFee(NATIVE_TOKEN, _amount);
 
@@ -219,28 +159,12 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         uint256 transferAmount = _amount - fee;
 
         // solhint-disable-next-line avoid-low-level-calls
-        (success, ) = address(liquidityPools).call{
-            value: transferAmount,
-            gas: 21000
-        }("");
+        (success, ) = address(liquidityPools).call{value: transferAmount, gas: 21000}("");
         require(success, "ERC20Bridge: transfer native token failed");
 
-        emit DepositedNative(
-            msg.sender,
-            NATIVE_TOKEN,
-            _chainId,
-            _receiver,
-            fee,
-            transferAmount
-        );
+        emit DepositedNative(msg.sender, NATIVE_TOKEN, _chainId, _receiver, fee, transferAmount);
 
-        bytes memory data = abi.encode(
-            msg.sender,
-            NATIVE_TOKEN,
-            _chainId,
-            _receiver,
-            transferAmount
-        );
+        bytes memory data = abi.encode(msg.sender, NATIVE_TOKEN, _chainId, _receiver, transferAmount);
 
         // solhint-disable-next-line check-send-result
         relayBridge.send(_chainId, block.gaslimit, data);
@@ -253,9 +177,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         address _receiver,
         uint256 _amount
     ) public view returns (bool) {
-        bytes32 id = keccak256(
-            abi.encodePacked(_sender, _txHash, _token, _receiver, _amount)
-        );
+        bytes32 id = keccak256(abi.encodePacked(_sender, _txHash, _token, _receiver, _amount));
         return executed[id];
     }
 
@@ -267,13 +189,8 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         address _receiver,
         uint256 _amount
     ) private {
-        require(
-            tokenManager.getType(_token) != TokenType.DISABLED,
-            "TokenManager: token is not enabled"
-        );
-        bytes32 id = keccak256(
-            abi.encodePacked(_sender, _txHash, _token, _receiver, _amount)
-        );
+        require(tokenManager.getType(_token) != TokenType.DISABLED, "TokenManager: token is not enabled");
+        bytes32 id = keccak256(abi.encodePacked(_sender, _txHash, _token, _receiver, _amount));
 
         executed[id] = true;
 
