@@ -46,6 +46,7 @@ publish:
   needs: []
   only: [tags]
   script:
+    - npm install
     - npm run compile
     - npm run build
     - npm run copy-types
