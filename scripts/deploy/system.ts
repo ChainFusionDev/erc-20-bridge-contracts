@@ -19,6 +19,7 @@ export async function deploySystemContracts(options?: SystemDeploymentOptions): 
     erc20BridgeMediator: await deployer.deploy(ethers.getContractFactory('ERC20BridgeMediator'), 'ERC20BridgeMediator'),
   };
 
+  const contractsConfig = await readContractsConfig();
   if (params.bridgeAppFactory !== undefined) {
     const bridgeAppFactory = await ethers.getContractAt('IBridgeAppFactory', params.bridgeAppFactory);
     const bridgeAppAddress = await bridgeAppFactory.callStatic.createApp();
@@ -27,19 +28,14 @@ export async function deploySystemContracts(options?: SystemDeploymentOptions): 
     const bridgeApp = await ethers.getContractAt('IBridgeApp', bridgeAppAddress);
     await bridgeApp.setMediator(res.erc20BridgeMediator.address);
 
-    const contractsConfig = await readContractsConfig();
     contractsConfig.bridgeAppFactory = bridgeAppFactory.address;
     contractsConfig.bridgeApp = bridgeApp.address;
-    updateContractsConfig(contractsConfig, res);
-
-    await writeContractsConfig(contractsConfig);
   }
 
   deployer.log('Successfully deployed contracts\n');
 
-  deployer.log('Initializing contracts\n');
-
-  deployer.log('Successfully initialized contracts\n');
+  updateContractsConfig(contractsConfig, res);
+  await writeContractsConfig(contractsConfig);
 
   if (params.verify) {
     await deployer.verifyObjectValues(res);

@@ -11,7 +11,7 @@ async function main() {
   const bridgeAppAddress = contractsConfig.bridgeAppAddress ?? process.env.BRIDGE_APP_ADDRESS;
   const relayBridge = contractsConfig.relayBridge ?? process.env.RELAY_BRIDGE_ADDRESS;
 
-  await deployBridgeContracts({ displayLogs: true, verify: verify, relayBridge: relayBridge, foundationAddress: foundationAddress, bridgeAppAddress: bridgeAppAddress });
+  await deployBridgeContracts({ displayLogs: true, verify, relayBridge, foundationAddress, bridgeAppAddress });
 }
 
 main().catch((error) => {

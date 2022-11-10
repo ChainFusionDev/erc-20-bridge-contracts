@@ -1,11 +1,9 @@
 import { ethers } from 'hardhat';
 import { Deployer } from './deployer';
 
-import {} from '../../typechain';
-
 const defaultSetAppParameters: SetAppParameters = {
-  erc20Bridge: '0x5b7eFCb3ebbde03625A92C67a87c5a58F046e64f',
-  bridgeApp: '0x03080d4C8340c9b23D2fe87169B1Df8EccFE4230',
+  erc20Bridge: '0x0000000000000000000000000000000000000001',
+  bridgeApp: '0x0000000000000000000000000000000000000001',
   chainId: 953842,
 
   displayLogs: false,

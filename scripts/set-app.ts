@@ -10,7 +10,7 @@ async function main() {
     const contractsConfig = await readContractsConfig();
     const bridgeApp = contractsConfig.bridgeApp ?? process.env.BRIDGE_APP_ADDRESS;
 
-    await setApp({ displayLogs: true, erc20Bridge: erc20Bridge, bridgeApp: bridgeApp, chainId: chainId });
+    await setApp({ displayLogs: true, erc20Bridge, bridgeApp, chainId });
 }
 
 main().catch((error) => {

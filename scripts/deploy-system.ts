@@ -7,7 +7,7 @@ async function main() {
   const contractsConfig = await readContractsConfig();
   const bridgeAppFactory = contractsConfig.bridgeAppFactory ?? process.env.BRIDGE_APP_FACTORY;
 
-  await deploySystemContracts({ displayLogs: true, verify, bridgeAppFactory: bridgeAppFactory });
+  await deploySystemContracts({ displayLogs: true, verify, bridgeAppFactory });
 }
 
 main().catch((error) => {
