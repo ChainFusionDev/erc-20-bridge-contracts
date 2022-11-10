@@ -1,5 +1,6 @@
 import { ethers } from 'hardhat';
 import { Deployer } from './deployer';
+import { readContractsConfig, updateContractsConfig, writeContractsConfig } from './config';
 
 import { ERC20BridgeMediator } from '../../typechain';
 
@@ -22,8 +23,16 @@ export async function deploySystemContracts(options?: SystemDeploymentOptions): 
     const bridgeAppFactory = await ethers.getContractAt('IBridgeAppFactory', params.bridgeAppFactory);
     const bridgeAppAddress = await bridgeAppFactory.callStatic.createApp();
     await (await bridgeAppFactory.createApp()).wait();
+
     const bridgeApp = await ethers.getContractAt('IBridgeApp', bridgeAppAddress);
     await bridgeApp.setMediator(res.erc20BridgeMediator.address);
+
+    const contractsConfig = await readContractsConfig();
+    contractsConfig.bridgeAppFactory = bridgeAppFactory.address;
+    contractsConfig.bridgeApp = bridgeApp.address;
+    updateContractsConfig(contractsConfig, res);
+
+    await writeContractsConfig(contractsConfig);
   }
 
   deployer.log('Successfully deployed contracts\n');
@@ -51,6 +60,14 @@ function resolveParameters(options?: SystemDeploymentOptions): SystemDeploymentP
 
   if (options.bridgeAppFactory !== undefined) {
     parameters.bridgeAppFactory = options.bridgeAppFactory;
+  }
+
+  if (options.displayLogs !== undefined) {
+    parameters.displayLogs = options.displayLogs;
+  }
+
+  if (options.verify !== undefined) {
+    parameters.verify = options.verify;
   }
 
   return parameters;

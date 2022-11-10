@@ -3,44 +3,32 @@ import { Deployer } from './deployer';
 
 import {} from '../../typechain';
 
-const defaultSystemDeploymentParameters: SystemDeploymentParameters = {
+const defaultSetAppParameters: SetAppParameters = {
   erc20Bridge: '0x5b7eFCb3ebbde03625A92C67a87c5a58F046e64f',
   bridgeApp: '0x03080d4C8340c9b23D2fe87169B1Df8EccFE4230',
-  chainId: '953842',
+  chainId: 953842,
 
   displayLogs: false,
-  verify: false,
 };
 
-export async function deploySystemContracts(options?: SystemDeploymentOptions): Promise<SystemDeploymentResult> {
+export async function setApp(options?: SetAppOptions): Promise<void> {
   const params = resolveParameters(options);
   const deployer = new Deployer(params.displayLogs);
 
-  deployer.log('Deploying contracts\n');
+  deployer.log('Setting contract address in bridge app\n');
 
-  const res: SystemDeployment = {};
+  deployer.log(`ChainId: ${params.chainId} Address: ${params.erc20Bridge}\n`);
 
   const bridgeApp = await ethers.getContractAt('IBridgeApp', params.bridgeApp);
   await bridgeApp.setContractAddress(params.chainId, params.erc20Bridge);
 
-  deployer.log('Successfully deployed contracts\n');
+  deployer.log('Successfully set contract address in bridge app\n');
 
-  deployer.log('Initializing contracts\n');
-
-  deployer.log('Successfully initialized contracts\n');
-
-  if (params.verify) {
-    await deployer.verifyObjectValues(res);
-  }
-
-  return {
-    ...res,
-    ...params,
-  };
+  return;
 }
 
-function resolveParameters(options?: SystemDeploymentOptions): SystemDeploymentParameters {
-  let parameters = defaultSystemDeploymentParameters;
+function resolveParameters(options?: SetAppOptions): SetAppParameters {
+  let parameters = defaultSetAppParameters;
 
   if (options === undefined) {
     return parameters;
@@ -58,27 +46,25 @@ function resolveParameters(options?: SystemDeploymentOptions): SystemDeploymentP
     parameters.bridgeApp = options.bridgeApp;
   }
 
+  if (options.displayLogs !== undefined) {
+    parameters.displayLogs = options.displayLogs;
+  }
+
   return parameters;
 }
 
-export interface SystemDeploymentResult extends SystemDeployment, SystemDeploymentParameters {}
-
-export interface SystemDeployment {}
-
-export interface SystemDeploymentParameters {
+export interface SetAppParameters {
   erc20Bridge: string;
-  chainId: string;
+  chainId: number;
   bridgeApp: string;
 
   displayLogs: boolean;
-  verify: boolean;
 }
 
-export interface SystemDeploymentOptions {
+export interface SetAppOptions {
   erc20Bridge?: string;
-  chainId?: string;
+  chainId?: number;
   bridgeApp?: string;
 
   displayLogs?: boolean;
-  verify?: boolean;
 }
