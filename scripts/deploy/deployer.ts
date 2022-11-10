@@ -1,15 +1,9 @@
 import hre from 'hardhat';
 import { ethers } from 'hardhat';
 import { BaseContract, Contract, ContractTransaction } from 'ethers';
-
-export interface ContractsObject {
-  [key: string]: Contract;
-}
-
 export interface ContractFactory<C extends Contract> {
   deploy(): Promise<C>;
 }
-
 export class Deployer {
   readonly displayLogs: boolean;
 
@@ -17,7 +11,7 @@ export class Deployer {
     this.displayLogs = displayLogs;
   }
 
-  public async deploy<C extends Contract>(factoryPromise: Promise<ContractFactory<C>>, name?: String): Promise<C> {
+  public async deploy<C extends Contract>(factoryPromise: Promise<ContractFactory<C>>, name?: string): Promise<C> {
     if (name === undefined) {
       name = 'Contract';
     }
