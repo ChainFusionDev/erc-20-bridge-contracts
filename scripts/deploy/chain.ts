@@ -1,5 +1,5 @@
 import { BigNumber } from 'ethers';
-import { ethers, network } from 'hardhat';
+import { ethers } from 'hardhat';
 import {
   ERC20Bridge,
   FeeManager,
@@ -8,7 +8,6 @@ import {
   SignerStorage,
   TokenManager,
 } from '../../typechain';
-import { readChainContractsConfig, updateContractsConfig, writeChainContractsConfig } from './config';
 import { Deployer } from './deployer';
 
 const defaultBridgeDeploymentParameters: BridgeDeploymentParameters = {
@@ -89,11 +88,6 @@ export async function deployBridgeContracts(options?: BridgeDeploymentOptions): 
   );
 
   deployer.log('Successfully initialized contracts\n');
-
-  const chainId = network.config.chainId ?? 1;
-  const contractsConfig = await readChainContractsConfig(chainId);
-  updateContractsConfig(contractsConfig, res);
-  await writeChainContractsConfig(chainId, contractsConfig);
 
   if (params.verify) {
     await deployer.verifyObjectValues(res);

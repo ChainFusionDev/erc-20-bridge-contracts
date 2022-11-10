@@ -26,7 +26,7 @@ export async function writeContractsConfig(config: ContractsConfig): Promise<voi
 
 export async function updateContractsConfig(config: ContractsConfig, data: Object) {
   for (const [key, value] of Object.entries(data)) {
-    if (value instanceof BaseContract) {
+    if (value !== undefined && value instanceof BaseContract) {
       config[key] = value.address;
     }
   }
