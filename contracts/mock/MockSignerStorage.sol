@@ -2,8 +2,9 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "../interfaces/ISignerStorage.sol";
 
-contract SignerStorage is Initializable {
+contract MockSignerStorage is ISignerStorage, Initializable {
     address public signer;
 
     event SignerUpdated(address _signer);

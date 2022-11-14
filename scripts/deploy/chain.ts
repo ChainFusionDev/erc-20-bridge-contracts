@@ -1,13 +1,6 @@
 import { BigNumber } from 'ethers';
 import { ethers } from 'hardhat';
-import {
-  ERC20Bridge,
-  FeeManager,
-  BridgeValidatorFeePool,
-  LiquidityPools,
-  SignerStorage,
-  TokenManager,
-} from '../../typechain';
+import { ERC20Bridge, FeeManager, BridgeValidatorFeePool, LiquidityPools, TokenManager } from '../../typechain';
 import { Deployer } from './deployer';
 
 const defaultBridgeDeploymentParameters: BridgeDeploymentParameters = {
@@ -16,6 +9,7 @@ const defaultBridgeDeploymentParameters: BridgeDeploymentParameters = {
   foundationAddress: '0x0000000000000000000000000000000000000001',
   bridgeAppAddress: '0x0000000000000000000000000000000000000001',
   relayBridge: '0x0000000000000000000000000000000000000001',
+  signerStorage: '0x0000000000000000000000000000000000000001',
 
   displayLogs: false,
   verify: false,
@@ -30,7 +24,6 @@ export async function deployBridgeContracts(options?: BridgeDeploymentOptions): 
   deployer.log('Deploying contracts\n');
 
   const res: BridgeDeployment = {
-    signerStorage: await deployer.deploy(ethers.getContractFactory('SignerStorage'), 'SignerStorage'),
     tokenManager: await deployer.deploy(ethers.getContractFactory('TokenManager'), 'TokenManager'),
     feeManager: await deployer.deploy(ethers.getContractFactory('FeeManager'), 'FeeManager'),
     bridgeValidatorFeePool: await deployer.deploy(
@@ -45,12 +38,11 @@ export async function deployBridgeContracts(options?: BridgeDeploymentOptions): 
 
   deployer.log('Initializing contracts\n');
 
-  await deployer.sendTransaction(res.signerStorage.initialize(validator.address), 'Initializing ValidatorStorage');
-  await deployer.sendTransaction(res.tokenManager.initialize(res.signerStorage.address), 'Initializing TokenManager');
+  await deployer.sendTransaction(res.tokenManager.initialize(params.signerStorage), 'Initializing TokenManager');
 
   await deployer.sendTransaction(
     res.feeManager.initialize(
-      res.signerStorage.address,
+      params.signerStorage,
       res.liquidityPools.address,
       params.foundationAddress,
       res.bridgeValidatorFeePool.address,
@@ -61,7 +53,7 @@ export async function deployBridgeContracts(options?: BridgeDeploymentOptions): 
 
   await deployer.sendTransaction(
     res.liquidityPools.initialize(
-      res.signerStorage.address,
+      params.signerStorage,
       res.tokenManager.address,
       res.erc20Bridge.address,
       res.feeManager.address,
@@ -72,7 +64,7 @@ export async function deployBridgeContracts(options?: BridgeDeploymentOptions): 
 
   await deployer.sendTransaction(
     res.erc20Bridge.initialize(
-      res.signerStorage.address,
+      params.signerStorage,
       res.tokenManager.address,
       res.liquidityPools.address,
       res.feeManager.address,
@@ -83,7 +75,7 @@ export async function deployBridgeContracts(options?: BridgeDeploymentOptions): 
   );
 
   await deployer.sendTransaction(
-    res.bridgeValidatorFeePool.initialize(res.signerStorage.address, res.erc20Bridge.address, validator.address),
+    res.bridgeValidatorFeePool.initialize(params.signerStorage, res.erc20Bridge.address, validator.address),
     'Initializing BridgeValidatorFeePool'
   );
 
@@ -134,13 +126,16 @@ function resolveParameters(options?: BridgeDeploymentOptions): BridgeDeploymentP
     parameters.relayBridge = options.relayBridge;
   }
 
+  if (options.signerStorage !== undefined) {
+    parameters.signerStorage = options.signerStorage;
+  }
+
   return parameters;
 }
 
 export interface BridgeDeploymentResult extends BridgeDeployment, BridgeDeploymentParameters {}
 
 export interface BridgeDeployment {
-  signerStorage: SignerStorage;
   tokenManager: TokenManager;
   feeManager: FeeManager;
   bridgeValidatorFeePool: BridgeValidatorFeePool;
@@ -154,6 +149,7 @@ export interface BridgeDeploymentParameters {
   foundationAddress: string;
   bridgeAppAddress: string;
   relayBridge: string;
+  signerStorage: string;
   displayLogs: boolean;
   verify: boolean;
 }
@@ -164,6 +160,7 @@ export interface BridgeDeploymentOptions {
   foundationAddress?: string;
   bridgeAppAddress?: string;
   relayBridge?: string;
+  signerStorage?: string;
   displayLogs?: boolean;
   verify?: boolean;
   deployMocks?: boolean;

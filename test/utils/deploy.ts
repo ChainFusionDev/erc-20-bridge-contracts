@@ -8,6 +8,7 @@ import {
   ERC20Bridgeable,
   MockRelayBridge,
   MockBridgeAppFactory,
+  MockSignerStorage,
 } from '../../typechain';
 
 export async function deploySystem(options?: SystemDeploymentOptions): Promise<SystemDeploymentResult> {
@@ -22,10 +23,17 @@ export async function deployBridgeWithMocks(
   options?: BridgeDeploymentOptions
 ): Promise<BridgeWithMocksDeploymentResult> {
   const chainId = BigNumber.from(853);
+  const [signer] = await ethers.getSigners();
 
   const MockRelayBridge = await ethers.getContractFactory('MockRelayBridge');
   const mockRelayBridge = await MockRelayBridge.deploy();
   await mockRelayBridge.deployed();
+
+  const MockSignerStorage = await ethers.getContractFactory('MockSignerStorage');
+  const mockSignerStorage = await MockSignerStorage.deploy();
+  await mockSignerStorage.deployed();
+
+  await mockSignerStorage.initialize(signer.address);
 
   if (options === undefined) {
     options = {};
@@ -33,6 +41,10 @@ export async function deployBridgeWithMocks(
 
   if (options.relayBridge === undefined) {
     options.relayBridge = mockRelayBridge.address;
+  }
+
+  if (options.signerStorage === undefined) {
+    options.signerStorage = mockSignerStorage.address;
   }
 
   const deployment = await deployBridgeContracts(options);
@@ -59,6 +71,7 @@ export async function deployBridgeWithMocks(
     mockMintableBurnableToken: mockMintableBurnableToken,
     erc20Bridgeable: erc20Bridgeable,
     mockRelayBridge: mockRelayBridge,
+    mockSignerStorage: mockSignerStorage,
     ...deployment,
   };
 }
@@ -74,8 +87,8 @@ export async function deploySystemWithMocks(
     options = {};
   }
 
-  if (options.bridgeAppFactory === undefined) {
-    options.bridgeAppFactory = mockBridgeAppFactory.address;
+  if (options.bridgeAppFactoryAddress === undefined) {
+    options.bridgeAppFactoryAddress = mockBridgeAppFactory.address;
   }
 
   const deployment = await deploySystemContracts(options);
@@ -91,6 +104,7 @@ export interface BridgeWithMocksDeploymentResult extends BridgeDeploymentResult 
   mockMintableBurnableToken: MockMintableBurnableToken;
   erc20Bridgeable: ERC20Bridgeable;
   mockRelayBridge: MockRelayBridge;
+  mockSignerStorage: MockSignerStorage;
 }
 
 export interface SystemWithMocksDeploymentResult extends SystemDeploymentResult {

@@ -10,8 +10,9 @@ async function main() {
   const foundationAddress = contractsConfig.foundationAddress ?? process.env.FOUNDATION_ADDRESS;
   const bridgeAppAddress = contractsConfig.bridgeAppAddress ?? process.env.BRIDGE_APP_ADDRESS;
   const relayBridge = contractsConfig.relayBridge ?? process.env.RELAY_BRIDGE_ADDRESS;
+  const signerStorage = contractsConfig.signerStorage ?? process.env.SIGNER_STORAGE;
 
-  const res = await deployBridgeContracts({ displayLogs: true, verify, relayBridge, foundationAddress, bridgeAppAddress });
+  const res = await deployBridgeContracts({ displayLogs: true, verify, signerStorage, relayBridge, foundationAddress, bridgeAppAddress });
 
   updateContractsConfig(contractsConfig, res);
   await writeChainContractsConfig(chainId, contractsConfig);
