@@ -1,5 +1,5 @@
 import { BigNumber } from 'ethers';
-import { ethers } from 'hardhat';
+import { ethers, network } from 'hardhat';
 import { ERC20Bridge, FeeManager, BridgeValidatorFeePool, LiquidityPools, TokenManager } from '../../typechain';
 import { Deployer } from './deployer';
 
@@ -20,6 +20,13 @@ export async function deployBridgeContracts(options?: BridgeDeploymentOptions): 
   const deployer = new Deployer(params.displayLogs);
 
   const [validator] = await ethers.getSigners();
+
+  if (network.name === 'hardhat') {
+    const signerStorage = await deployer.deploy(ethers.getContractFactory('MockSignerStorage'), 'SignerStorage');
+    await signerStorage.initialize(validator.address);
+
+    params.signerStorage = signerStorage.address;
+  }
 
   deployer.log('Deploying contracts\n');
 

@@ -1,4 +1,4 @@
-import { ethers } from 'hardhat';
+import { ethers, network } from 'hardhat';
 import { Deployer } from './deployer';
 
 import { ERC20BridgeMediator, IBridgeApp, IBridgeAppFactory } from '../../typechain';
@@ -18,7 +18,7 @@ export async function deploySystemContracts(options?: SystemDeploymentOptions): 
     erc20BridgeMediator: await deployer.deploy(ethers.getContractFactory('ERC20BridgeMediator'), 'ERC20BridgeMediator'),
   };
 
-  if (params.bridgeAppFactoryAddress !== undefined) {
+  if (network.name !== 'hardhat' && params.bridgeAppFactoryAddress !== undefined) {
     const bridgeAppFactory = await ethers.getContractAt('IBridgeAppFactory', params.bridgeAppFactoryAddress);
     const bridgeAppAddress = await bridgeAppFactory.callStatic.createApp();
     await (await bridgeAppFactory.createApp()).wait();
