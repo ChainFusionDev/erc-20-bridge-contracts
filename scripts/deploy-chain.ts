@@ -1,4 +1,4 @@
-import { ethers, network } from 'hardhat';
+import { network } from 'hardhat';
 import { deployBridgeContracts } from './deploy/chain';
 import { readChainContractsConfig, updateContractsConfig, writeChainContractsConfig } from './deploy/config';
 

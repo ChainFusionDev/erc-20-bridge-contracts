@@ -1,7 +1,7 @@
 import hre from 'hardhat';
 import { expect } from 'chai';
 import { utils } from 'ethers';
-import { ethers } from 'hardhat';
+import { ethers, network } from 'hardhat';
 import { deployBridge, deployBridgeWithMocks } from '../utils/deploy';
 
 describe('ERC20Bridge', function () {
@@ -34,7 +34,7 @@ describe('ERC20Bridge', function () {
     const depositAmountZero = utils.parseEther('0');
     const transferAmount = utils.parseEther('0.99');
     const { mockChainId, mockToken, erc20Bridge, liquidityPools, mockRelayBridge } = await deployBridgeWithMocks();
-    const sourceChain = ethers.provider.network.chainId;
+    const sourceChain = network.config.chainId;
     const gasLimit = (await ethers.provider.getBlock(0)).gasLimit;
     const nonce = 0;
 
@@ -68,7 +68,7 @@ describe('ERC20Bridge', function () {
     const depositAmount = utils.parseEther('1');
     const transferAmount = utils.parseEther('0.99');
     const NATIVE_TOKEN = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
-    const sourceChainId = ethers.provider.network.chainId;
+    const sourceChainId = network.config.chainId;
     const gasLimit = (await ethers.provider.getBlock(0)).gasLimit;
 
     const {
