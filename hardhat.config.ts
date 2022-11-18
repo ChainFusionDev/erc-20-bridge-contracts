@@ -28,11 +28,29 @@ const config: HardhatUserConfig = {
       accounts: {
         mnemonic: 'test test test test test test test test test test test junk'
       },
-      gasPrice: 10000000000,
+      gasPrice: 100000000000,
     },
     ternopil: {
       chainId: 953842,
       url: 'https://rpc.chainfusion.org',
+      gasPrice: 10000000000,
+      accounts,
+    },
+    bg1: {
+      chainId: 5001,
+      url: 'https://bg1-rpc.chainfusion.org',
+      gasPrice: 10000000000,
+      accounts,
+    },
+    bg2: {
+      chainId: 5002,
+      url: 'https://bg2-rpc.chainfusion.org',
+      gasPrice: 10000000000,
+      accounts,
+    },
+    bg3: {
+      chainId: 5003,
+      url: 'https://bg3-rpc.chainfusion.org',
       gasPrice: 10000000000,
       accounts,
     },
@@ -74,6 +92,30 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://explorer.chainfusion.org/api",
           browserURL: "https://explorer.chainfusion.org"
+        }
+      },
+      {
+        network: "bg1",
+        chainId: 5001,
+        urls: {
+          apiURL: "https://bg1-explorer.chainfusion.org/api",
+          browserURL: "https://bg1-explorer.chainfusion.org"
+        }
+      },
+      {
+        network: "bg2",
+        chainId: 5002,
+        urls: {
+          apiURL: "https://bg2-explorer.chainfusion.org/api",
+          browserURL: "https://bg2-explorer.chainfusion.org"
+        }
+      },
+      {
+        network: "bg3",
+        chainId: 5003,
+        urls: {
+          apiURL: "https://bg3-explorer.chainfusion.org/api",
+          browserURL: "https://bg3-explorer.chainfusion.org"
         }
       },
     ]
