@@ -41,6 +41,9 @@ describe('ERC20Bridge', function () {
     await mockToken.approve(erc20Bridge.address, depositAmount);
     await mockToken.approve(liquidityPools.address, depositAmount);
     await expect(
+      erc20Bridge.deposit(mockToken.address, Number(sourceChain), receiver.address, depositAmountZero)
+    ).to.be.revertedWith('ERC20Bridge: cannot deposit on the same chain ID');
+    await expect(
       erc20Bridge.deposit(mockToken.address, mockChainId, receiver.address, depositAmountZero)
     ).to.be.revertedWith('Bridge: amount cannot be equal to 0.');
     await erc20Bridge.deposit(mockToken.address, mockChainId, receiver.address, depositAmount);
@@ -99,7 +102,7 @@ describe('ERC20Bridge', function () {
 
     const hashToken = await mockRelayBridge.dataHash(
       erc20Bridge.address,
-      sourceChainId,
+      Number(sourceChainId),
       mockChainId,
       gasLimit,
       data,
@@ -108,7 +111,7 @@ describe('ERC20Bridge', function () {
 
     const hashMintToken = await mockRelayBridge.dataHash(
       erc20Bridge.address,
-      sourceChainId,
+      Number(sourceChainId),
       mockChainId,
       gasLimit,
       dataMintableToken,
@@ -117,7 +120,7 @@ describe('ERC20Bridge', function () {
 
     const hashNativeToken = await mockRelayBridge.dataHash(
       erc20Bridge.address,
-      sourceChainId,
+      Number(sourceChainId),
       mockChainId,
       gasLimit,
       dataNativeToken,
