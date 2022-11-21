@@ -28,23 +28,21 @@ contract BridgeValidatorFeePool is Initializable, SignerOwnable {
         address _validatorFeeReceiver
     ) external initializer {
         _setSignerStorage(_signerStorage);
-        setERC20Bridge(_erc20Bridge);
-        setValidatorFeeReceiver(_validatorFeeReceiver);
+        _setERC20Bridge(_erc20Bridge);
+        _setValidatorFeeReceiver(_validatorFeeReceiver);
+    }
+
+    function setERC20Bridge(address _erc20Bridge) public onlySigner {
+        _setERC20Bridge(_erc20Bridge);
     }
 
     function setValidatorFeeReceiver(address _validatorFeeReceiver) public onlySigner {
-        validatorFeeReceiver = _validatorFeeReceiver;
-        emit ValidatorFeeReceiverUpdated(_validatorFeeReceiver);
+        _setValidatorFeeReceiver(_validatorFeeReceiver);
     }
 
     function setLimitPerToken(address _token, uint256 _limit) public onlySigner {
         limitPerToken[_token] = _limit;
         emit LimitPerTokenUpdated(_token, _limit);
-    }
-
-    function setERC20Bridge(address _erc20Bridge) public onlySigner {
-        erc20Bridge = ERC20Bridge(_erc20Bridge);
-        emit ERC20BridgeUpdated(_erc20Bridge);
     }
 
     function collect(address _token) public {
@@ -68,5 +66,15 @@ contract BridgeValidatorFeePool is Initializable, SignerOwnable {
         }
 
         emit Collected(_token, balanceAmount);
+    }
+
+    function _setERC20Bridge(address _erc20Bridge) private {
+        erc20Bridge = ERC20Bridge(_erc20Bridge);
+        emit ERC20BridgeUpdated(_erc20Bridge);
+    }
+
+    function _setValidatorFeeReceiver(address _validatorFeeReceiver) private {
+        validatorFeeReceiver = _validatorFeeReceiver;
+        emit ValidatorFeeReceiverUpdated(_validatorFeeReceiver);
     }
 }

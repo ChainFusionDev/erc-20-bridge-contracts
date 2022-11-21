@@ -57,10 +57,10 @@ contract LiquidityPools is Initializable, SignerOwnable {
         uint256 _feePercentage
     ) external initializer {
         _setSignerStorage(_signerStorage);
-        setTokenManager(_tokenManager);
-        setERC20Bridge(_erc20Bridge);
-        setFeeManager(_feeManager);
-        setFeePercentage(_feePercentage);
+        _setTokenManager(_tokenManager);
+        _setERC20Bridge(_erc20Bridge);
+        _setFeeManager(_feeManager);
+        _setFeePercentage(_feePercentage);
     }
 
     function transfer(
@@ -90,23 +90,19 @@ contract LiquidityPools is Initializable, SignerOwnable {
     }
 
     function setTokenManager(address _tokenManager) public onlySigner {
-        tokenManager = TokenManager(_tokenManager);
-        emit TokenManagerUpdated(_tokenManager);
+        _setTokenManager(_tokenManager);
     }
 
     function setERC20Bridge(address _erc20Bridge) public onlySigner {
-        erc20Bridge = ERC20Bridge(_erc20Bridge);
-        emit ERC20BridgeUpdated(_erc20Bridge);
+        _setERC20Bridge(_erc20Bridge);
     }
 
     function setFeeManager(address payable _feeManager) public onlySigner {
-        feeManager = FeeManager(_feeManager);
-        emit FeeManagerUpdated(_feeManager);
+        _setFeeManager(_feeManager);
     }
 
     function setFeePercentage(uint256 _feePercentage) public onlySigner {
-        feePercentage = _feePercentage;
-        emit FeePercentageUpdated(_feePercentage);
+        _setFeePercentage(_feePercentage);
     }
 
     function addLiquidity(address _token, uint256 _amount) public {
@@ -154,6 +150,26 @@ contract LiquidityPools is Initializable, SignerOwnable {
     function rewardsOwing(address _token) public view returns (uint256) {
         uint256 newRewardPoints = totalRewardPoints[_token] - liquidityPositions[_token][msg.sender].lastRewardPoints;
         return (liquidityPositions[_token][msg.sender].balance * newRewardPoints) / BASE_DIVISOR;
+    }
+
+    function _setTokenManager(address _tokenManager) private {
+        tokenManager = TokenManager(_tokenManager);
+        emit TokenManagerUpdated(_tokenManager);
+    }
+
+    function _setERC20Bridge(address _erc20Bridge) private {
+        erc20Bridge = ERC20Bridge(_erc20Bridge);
+        emit ERC20BridgeUpdated(_erc20Bridge);
+    }
+
+    function _setFeeManager(address payable _feeManager) private {
+        feeManager = FeeManager(_feeManager);
+        emit FeeManagerUpdated(_feeManager);
+    }
+
+    function _setFeePercentage(uint256 _feePercentage) private {
+        feePercentage = _feePercentage;
+        emit FeePercentageUpdated(_feePercentage);
     }
 
     function _addLiquidity(address _token, uint256 _amount) private {

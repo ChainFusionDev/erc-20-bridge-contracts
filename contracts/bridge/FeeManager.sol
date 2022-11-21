@@ -34,30 +34,26 @@ contract FeeManager is Initializable, SignerOwnable {
         uint256 _validatorRefundFee
     ) external initializer {
         _setSignerStorage(_signerStorage);
-        setLiquidityPools(_liquidityPools);
-        setFoundationAddress(_foundationAddress);
-        setValidatorFeePool(_validatorFeePool);
-        setValidatorRefundFee(_validatorRefundFee);
+        _setLiquidityPools(_liquidityPools);
+        _setFoundationAddress(_foundationAddress);
+        _setValidatorFeePool(_validatorFeePool);
+        _setValidatorRefundFee(_validatorRefundFee);
     }
 
     function setLiquidityPools(address payable _liquidityPools) public onlySigner {
-        liquidityPools = LiquidityPools(_liquidityPools);
-        emit LiquidityPoolsUpdated(_liquidityPools);
+        _setLiquidityPools(_liquidityPools);
     }
 
     function setFoundationAddress(address _foundationAddress) public onlySigner {
-        foundationAddress = _foundationAddress;
-        emit FoundationAddressUpdated(_foundationAddress);
+        _setFoundationAddress(_foundationAddress);
     }
 
     function setValidatorFeePool(address payable _validatorFee) public onlySigner {
-        validatorFeePool = BridgeValidatorFeePool(_validatorFee);
-        emit ValidatorFeeUpdated(_validatorFee);
+        _setValidatorFeePool(_validatorFee);
     }
 
     function setValidatorRefundFee(uint256 _validatorRefundFee) public onlySigner {
-        validatorRefundFee = _validatorRefundFee;
-        emit ValidatorRefundFeeUpdated(_validatorRefundFee);
+        _setValidatorRefundFee(_validatorRefundFee);
     }
 
     function setTokenFee(
@@ -111,6 +107,26 @@ contract FeeManager is Initializable, SignerOwnable {
         require(fee <= amount, "FeeManager: fee to be less than or equal to amount");
 
         return fee;
+    }
+
+    function _setLiquidityPools(address payable _liquidityPools) private {
+        liquidityPools = LiquidityPools(_liquidityPools);
+        emit LiquidityPoolsUpdated(_liquidityPools);
+    }
+
+    function _setFoundationAddress(address _foundationAddress) private {
+        foundationAddress = _foundationAddress;
+        emit FoundationAddressUpdated(_foundationAddress);
+    }
+
+    function _setValidatorFeePool(address payable _validatorFee) private {
+        validatorFeePool = BridgeValidatorFeePool(_validatorFee);
+        emit ValidatorFeeUpdated(_validatorFee);
+    }
+
+    function _setValidatorRefundFee(uint256 _validatorRefundFee) private {
+        validatorRefundFee = _validatorRefundFee;
+        emit ValidatorRefundFeeUpdated(_validatorRefundFee);
     }
 
     function _calculateRewards(address token, uint256 totalRewards)
