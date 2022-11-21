@@ -33,7 +33,7 @@ In this example we are deploying to `ternopil` testnet. To deploy to different c
 Deployment involves running two scripts in sequence. The first script is deployed once, on ChainFusion network and used to create the BridgeApp that allows to register an app and set its addresses for each chain.
 
 ```
-$ npx hardhat --network ternopil run scripts/deploy-system.ts
+$ npx hardhat --network ternopil run scripts/deploy-chainfusion.ts
 ```
 The second script is deployed each time for a new chain, deploys the main contracts that are responsible for the bridge logic and sets the BridgeApp address in the ERC20Bridge contract.
 
@@ -58,5 +58,5 @@ $ npx hardhat --network goerli verify <CONTRACT_ADDRESS> <CONSTRUCTOR_PARAMETERS
 Or you can set `VERIFY` variable to `true` while deploying contracts to automatically verify them afterwards.
 
 ```
-$ VERIFY=true npx hardhat --network ternopil run scripts/deploy-system.ts
+$ VERIFY=true npx hardhat --network ternopil run scripts/deploy-chainfusion.ts
 ```
