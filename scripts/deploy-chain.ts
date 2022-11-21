@@ -12,7 +12,7 @@ async function main() {
   const bridgeAppAddress = contractsConfig.bridgeAppAddress ?? process.env.BRIDGE_APP_ADDRESS;
   const relayBridge = contractsConfig.relayBridge ?? process.env.RELAY_BRIDGE_ADDRESS;
   const signerStorage = contractsConfig.signerStorage ?? process.env.SIGNER_STORAGE;
-  const homeChainId = BigNumber.from(contractsConfig.homeChainId ?? process.env.HOME_CHAIN_ID);
+  const homeChainId = BigNumber.from(process.env.HOME_CHAIN_ID ?? '1');
 
   const res = await deployBridgeContracts({ displayLogs: true, verify, signerStorage, relayBridge, foundationAddress, bridgeAppAddress, homeChainId });
 
