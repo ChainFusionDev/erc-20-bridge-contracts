@@ -6,6 +6,7 @@ import { Deployer } from './deployer';
 const defaultBridgeDeploymentParameters: BridgeDeploymentParameters = {
   feePercentage: BigNumber.from('10000000000000000'),
   validatorRefundFee: BigNumber.from('10000000000000000'),
+  homeChainId: BigNumber.from(1),
   foundationAddress: '0x0000000000000000000000000000000000000001',
   bridgeApp: '0x0000000000000000000000000000000000000001',
   relayBridge: '0x0000000000000000000000000000000000000001',
@@ -82,7 +83,12 @@ export async function deployBridgeContracts(options?: BridgeDeploymentOptions): 
   );
 
   await deployer.sendTransaction(
-    res.bridgeValidatorFeePool.initialize(params.signerStorage, res.erc20Bridge.address, validator.address),
+    res.bridgeValidatorFeePool.initialize(
+      params.signerStorage,
+      res.erc20Bridge.address,
+      validator.address,
+      params.homeChainId
+    ),
     'Initializing BridgeValidatorFeePool'
   );
 
@@ -111,6 +117,10 @@ function resolveParameters(options?: BridgeDeploymentOptions): BridgeDeploymentP
 
   if (options.validatorRefundFee !== undefined) {
     parameters.validatorRefundFee = options.validatorRefundFee;
+  }
+
+  if (options.homeChainId !== undefined) {
+    parameters.homeChainId = options.homeChainId;
   }
 
   if (options.foundationAddress !== undefined) {
@@ -153,6 +163,7 @@ export interface BridgeDeployment {
 export interface BridgeDeploymentParameters {
   feePercentage: BigNumber;
   validatorRefundFee: BigNumber;
+  homeChainId: BigNumber;
   foundationAddress: string;
   bridgeApp: string;
   relayBridge: string;
@@ -164,6 +175,7 @@ export interface BridgeDeploymentParameters {
 export interface BridgeDeploymentOptions {
   feePercentage?: BigNumber;
   validatorRefundFee?: BigNumber;
+  homeChainId?: BigNumber;
   foundationAddress?: string;
   bridgeApp?: string;
   relayBridge?: string;

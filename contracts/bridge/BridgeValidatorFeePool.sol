@@ -13,6 +13,7 @@ contract BridgeValidatorFeePool is Initializable, SignerOwnable {
     mapping(address => uint256) public limitPerToken;
 
     address public validatorFeeReceiver;
+    uint256 public homeChainId;
 
     event ValidatorFeeReceiverUpdated(address validatorFeeReceiver);
     event LimitPerTokenUpdated(address token, uint256 limit);
@@ -25,11 +26,13 @@ contract BridgeValidatorFeePool is Initializable, SignerOwnable {
     function initialize(
         address _signerStorage,
         address _erc20Bridge,
-        address _validatorFeeReceiver
+        address _validatorFeeReceiver,
+        uint256 _homeChainId
     ) external initializer {
         _setSignerStorage(_signerStorage);
-        _setERC20Bridge(_erc20Bridge);
-        _setValidatorFeeReceiver(_validatorFeeReceiver);
+        setERC20Bridge(_erc20Bridge);
+        setValidatorFeeReceiver(_validatorFeeReceiver);
+        homeChainId = _homeChainId;
     }
 
     function setERC20Bridge(address _erc20Bridge) public onlySigner {
@@ -54,7 +57,7 @@ contract BridgeValidatorFeePool is Initializable, SignerOwnable {
             balanceAmount = address(this).balance;
 
             require(limitPerToken[_token] < balanceAmount, "BridgeValidatorFeePool: insufficient funds");
-            erc20Bridge.depositNative{value: balanceAmount}(block.chainid, validatorFeeReceiver);
+            erc20Bridge.depositNative{value: balanceAmount}(homeChainId, validatorFeeReceiver);
         } else {
             balanceAmount = IERC20(_token).balanceOf(address(this));
 
@@ -62,7 +65,7 @@ contract BridgeValidatorFeePool is Initializable, SignerOwnable {
 
             IERC20(_token).approve(address(erc20Bridge), balanceAmount);
 
-            erc20Bridge.deposit(_token, block.chainid, validatorFeeReceiver, balanceAmount);
+            erc20Bridge.deposit(_token, homeChainId, validatorFeeReceiver, balanceAmount);
         }
 
         emit Collected(_token, balanceAmount);
