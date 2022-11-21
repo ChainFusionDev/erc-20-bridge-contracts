@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./SignerOwnable.sol";
@@ -10,7 +11,7 @@ import "./ERC20Bridge.sol";
 import "./FeeManager.sol";
 import "./Globals.sol";
 
-contract LiquidityPools is Initializable, SignerOwnable {
+contract LiquidityPools is Initializable, Ownable, SignerOwnable {
     struct LiquidityPosition {
         uint256 balance;
         uint256 lastRewardPoints;
@@ -101,7 +102,7 @@ contract LiquidityPools is Initializable, SignerOwnable {
         _setFeeManager(_feeManager);
     }
 
-    function setFeePercentage(uint256 _feePercentage) public onlySigner {
+    function setFeePercentage(uint256 _feePercentage) public onlyOwner {
         _setFeePercentage(_feePercentage);
     }
 

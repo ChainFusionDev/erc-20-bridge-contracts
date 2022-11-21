@@ -2,13 +2,14 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./SignerOwnable.sol";
 import "./BridgeValidatorFeePool.sol";
 import "./LiquidityPools.sol";
 import "./Globals.sol";
 
-contract FeeManager is Initializable, SignerOwnable {
+contract FeeManager is Initializable, Ownable, SignerOwnable {
     LiquidityPools public liquidityPools;
     BridgeValidatorFeePool public validatorFeePool;
     address public foundationAddress;
@@ -52,7 +53,7 @@ contract FeeManager is Initializable, SignerOwnable {
         _setValidatorFeePool(_validatorFee);
     }
 
-    function setValidatorRefundFee(uint256 _validatorRefundFee) public onlySigner {
+    function setValidatorRefundFee(uint256 _validatorRefundFee) public onlyOwner {
         _setValidatorRefundFee(_validatorRefundFee);
     }
 
@@ -61,7 +62,7 @@ contract FeeManager is Initializable, SignerOwnable {
         uint256 tokenFee,
         uint256 validatorReward,
         uint256 liquidityReward
-    ) public {
+    ) public onlyOwner {
         tokenFeePercentage[token] = tokenFee;
         validatorRewardPercentage[token] = validatorReward;
         liquidityRewardPercentage[token] = liquidityReward;

@@ -4,6 +4,22 @@ import { ethers } from 'hardhat';
 import { deployBridgeWithMocks } from '../utils/deploy';
 
 describe('FeeManager', function () {
+  it('should set fee by owner', async function () {
+    const [, other] = await ethers.getSigners();
+
+    const { mockToken, feeManager } = await deployBridgeWithMocks();
+    const tokenFee = utils.parseEther('0.01');
+    const validatorReward = utils.parseEther('0.3');
+    const liquidityReward = utils.parseEther('0.3');
+
+    await feeManager.setTokenFee(mockToken.address, tokenFee, validatorReward, liquidityReward);
+
+    const otherFeeManager = feeManager.connect(other);
+    await expect(
+      otherFeeManager.setTokenFee(mockToken.address, tokenFee, validatorReward, liquidityReward)
+    ).to.be.revertedWith('Ownable: caller is not the owner');
+  });
+
   it('should check if fee is transferred to FeeManager contract', async function () {
     const [, receiver] = await ethers.getSigners();
     const amount = utils.parseEther('1');
