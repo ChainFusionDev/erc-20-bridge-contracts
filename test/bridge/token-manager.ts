@@ -36,8 +36,12 @@ describe('TokenManager', function () {
     await erc20Bridgeable.approve(tokenManager.address, depositAmount);
 
     const tokenManagerUser = await ethers.getContractAt('TokenManager', tokenManager.address, user);
-    await expect(tokenManagerUser.deployToken(tokenName, tokenSymbol)).to.be.revertedWith('SignerOwnable: only signer');
-    await expect(tokenManagerUser.setToken(tokenAddress, tokenType)).to.be.revertedWith('SignerOwnable: only signer');
+    await expect(tokenManagerUser.deployToken(tokenName, tokenSymbol)).to.be.revertedWith(
+      'Ownable: caller is not the owner'
+    );
+    await expect(tokenManagerUser.setToken(tokenAddress, tokenType)).to.be.revertedWith(
+      'Ownable: caller is not the owner'
+    );
 
     const erc20BridgeableAddress = await tokenManager.callStatic.deployToken(tokenName, tokenSymbol);
     await tokenManager.deployToken(tokenName, tokenSymbol);

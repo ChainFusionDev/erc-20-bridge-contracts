@@ -59,9 +59,9 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         address _relayBridge
     ) external initializer {
         _setSignerStorage(_signerStorage);
-        setTokenManager(_tokenManager);
-        setLiquidityPools(_liquidityPools);
-        setFeeManager(_feeManager);
+        _setTokenManager(_tokenManager);
+        _setLiquidityPools(_liquidityPools);
+        _setFeeManager(_feeManager);
         bridgeAppAddress = _bridgeAppAddress;
         relayBridge = IRelayBridge(_relayBridge);
     }
@@ -127,23 +127,19 @@ contract ERC20Bridge is Initializable, SignerOwnable {
     }
 
     function setRelayBridge(address _relayBridge) public onlySigner {
-        relayBridge = IRelayBridge(_relayBridge);
-        emit RelayBridgeUpdated(_relayBridge);
+        _setRelayBridge(_relayBridge);
     }
 
     function setTokenManager(address _tokenManager) public onlySigner {
-        tokenManager = TokenManager(_tokenManager);
-        emit TokenManagerUpdated(_tokenManager);
+        _setTokenManager(_tokenManager);
     }
 
     function setLiquidityPools(address payable _liquidityPools) public onlySigner {
-        liquidityPools = LiquidityPools(_liquidityPools);
-        emit LiquidityPoolsUpdated(_liquidityPools);
+        _setLiquidityPools(_liquidityPools);
     }
 
     function setFeeManager(address payable _feeManager) public onlySigner {
-        feeManager = FeeManager(_feeManager);
-        emit FeeManagerUpdated(_feeManager);
+        _setFeeManager(_feeManager);
     }
 
     function depositNative(uint256 _chainId, address _receiver) public payable {
@@ -180,6 +176,26 @@ contract ERC20Bridge is Initializable, SignerOwnable {
     ) public view returns (bool) {
         bytes32 id = keccak256(abi.encodePacked(_sender, _txHash, _token, _receiver, _amount));
         return executed[id];
+    }
+
+    function _setRelayBridge(address _relayBridge) private {
+        relayBridge = IRelayBridge(_relayBridge);
+        emit RelayBridgeUpdated(_relayBridge);
+    }
+
+    function _setTokenManager(address _tokenManager) private {
+        tokenManager = TokenManager(_tokenManager);
+        emit TokenManagerUpdated(_tokenManager);
+    }
+
+    function _setLiquidityPools(address payable _liquidityPools) private {
+        liquidityPools = LiquidityPools(_liquidityPools);
+        emit LiquidityPoolsUpdated(_liquidityPools);
+    }
+
+    function _setFeeManager(address payable _feeManager) private {
+        feeManager = FeeManager(_feeManager);
+        emit FeeManagerUpdated(_feeManager);
     }
 
     function _executeTransfer(

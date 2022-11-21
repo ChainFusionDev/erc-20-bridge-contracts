@@ -2,13 +2,14 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./SignerOwnable.sol";
 import "./BridgeValidatorFeePool.sol";
 import "./LiquidityPools.sol";
 import "./Globals.sol";
 
-contract FeeManager is Initializable, SignerOwnable {
+contract FeeManager is Initializable, Ownable, SignerOwnable {
     LiquidityPools public liquidityPools;
     BridgeValidatorFeePool public validatorFeePool;
     address public foundationAddress;
@@ -34,30 +35,26 @@ contract FeeManager is Initializable, SignerOwnable {
         uint256 _validatorRefundFee
     ) external initializer {
         _setSignerStorage(_signerStorage);
-        setLiquidityPools(_liquidityPools);
-        setFoundationAddress(_foundationAddress);
-        setValidatorFeePool(_validatorFeePool);
-        setValidatorRefundFee(_validatorRefundFee);
+        _setLiquidityPools(_liquidityPools);
+        _setFoundationAddress(_foundationAddress);
+        _setValidatorFeePool(_validatorFeePool);
+        _setValidatorRefundFee(_validatorRefundFee);
     }
 
     function setLiquidityPools(address payable _liquidityPools) public onlySigner {
-        liquidityPools = LiquidityPools(_liquidityPools);
-        emit LiquidityPoolsUpdated(_liquidityPools);
+        _setLiquidityPools(_liquidityPools);
     }
 
     function setFoundationAddress(address _foundationAddress) public onlySigner {
-        foundationAddress = _foundationAddress;
-        emit FoundationAddressUpdated(_foundationAddress);
+        _setFoundationAddress(_foundationAddress);
     }
 
     function setValidatorFeePool(address payable _validatorFee) public onlySigner {
-        validatorFeePool = BridgeValidatorFeePool(_validatorFee);
-        emit ValidatorFeeUpdated(_validatorFee);
+        _setValidatorFeePool(_validatorFee);
     }
 
-    function setValidatorRefundFee(uint256 _validatorRefundFee) public onlySigner {
-        validatorRefundFee = _validatorRefundFee;
-        emit ValidatorRefundFeeUpdated(_validatorRefundFee);
+    function setValidatorRefundFee(uint256 _validatorRefundFee) public onlyOwner {
+        _setValidatorRefundFee(_validatorRefundFee);
     }
 
     function setTokenFee(
@@ -65,7 +62,7 @@ contract FeeManager is Initializable, SignerOwnable {
         uint256 tokenFee,
         uint256 validatorReward,
         uint256 liquidityReward
-    ) public {
+    ) public onlyOwner {
         tokenFeePercentage[token] = tokenFee;
         validatorRewardPercentage[token] = validatorReward;
         liquidityRewardPercentage[token] = liquidityReward;
@@ -111,6 +108,26 @@ contract FeeManager is Initializable, SignerOwnable {
         require(fee <= amount, "FeeManager: fee to be less than or equal to amount");
 
         return fee;
+    }
+
+    function _setLiquidityPools(address payable _liquidityPools) private {
+        liquidityPools = LiquidityPools(_liquidityPools);
+        emit LiquidityPoolsUpdated(_liquidityPools);
+    }
+
+    function _setFoundationAddress(address _foundationAddress) private {
+        foundationAddress = _foundationAddress;
+        emit FoundationAddressUpdated(_foundationAddress);
+    }
+
+    function _setValidatorFeePool(address payable _validatorFee) private {
+        validatorFeePool = BridgeValidatorFeePool(_validatorFee);
+        emit ValidatorFeeUpdated(_validatorFee);
+    }
+
+    function _setValidatorRefundFee(uint256 _validatorRefundFee) private {
+        validatorRefundFee = _validatorRefundFee;
+        emit ValidatorRefundFeeUpdated(_validatorRefundFee);
     }
 
     function _calculateRewards(address token, uint256 totalRewards)
