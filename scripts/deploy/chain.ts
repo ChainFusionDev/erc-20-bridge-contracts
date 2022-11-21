@@ -7,7 +7,7 @@ const defaultBridgeDeploymentParameters: BridgeDeploymentParameters = {
   feePercentage: BigNumber.from('10000000000000000'),
   validatorRefundFee: BigNumber.from('10000000000000000'),
   foundationAddress: '0x0000000000000000000000000000000000000001',
-  bridgeAppAddress: '0x0000000000000000000000000000000000000001',
+  bridgeApp: '0x0000000000000000000000000000000000000001',
   relayBridge: '0x0000000000000000000000000000000000000001',
   signerStorage: '0x0000000000000000000000000000000000000001',
 
@@ -75,7 +75,7 @@ export async function deployBridgeContracts(options?: BridgeDeploymentOptions): 
       res.tokenManager.address,
       res.liquidityPools.address,
       res.feeManager.address,
-      params.bridgeAppAddress,
+      params.bridgeApp,
       params.relayBridge
     ),
     'Initializing ERC20Bridge'
@@ -125,8 +125,8 @@ function resolveParameters(options?: BridgeDeploymentOptions): BridgeDeploymentP
     parameters.verify = options.verify;
   }
 
-  if (options.bridgeAppAddress !== undefined) {
-    parameters.bridgeAppAddress = options.bridgeAppAddress;
+  if (options.bridgeApp !== undefined) {
+    parameters.bridgeApp = options.bridgeApp;
   }
 
   if (options.relayBridge !== undefined) {
@@ -154,7 +154,7 @@ export interface BridgeDeploymentParameters {
   feePercentage: BigNumber;
   validatorRefundFee: BigNumber;
   foundationAddress: string;
-  bridgeAppAddress: string;
+  bridgeApp: string;
   relayBridge: string;
   signerStorage: string;
   displayLogs: boolean;
@@ -165,7 +165,7 @@ export interface BridgeDeploymentOptions {
   feePercentage?: BigNumber;
   validatorRefundFee?: BigNumber;
   foundationAddress?: string;
-  bridgeAppAddress?: string;
+  bridgeApp?: string;
   relayBridge?: string;
   signerStorage?: string;
   displayLogs?: boolean;
