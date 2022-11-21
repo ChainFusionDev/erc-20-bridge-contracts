@@ -17,7 +17,7 @@ test:
     # Test
     - npx hardhat coverage
     # Deploy
-    - npx hardhat run scripts/deploy-system.ts
+    - npx hardhat run scripts/deploy-chainfusion.ts
     - npx hardhat run scripts/deploy-chain.ts
     # Lint
     - npm run solhint
