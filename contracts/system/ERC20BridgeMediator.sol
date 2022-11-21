@@ -15,7 +15,7 @@ contract ERC20BridgeMediator is Ownable {
         uint256 sourceChain,
         uint256 destinationChain,
         bytes memory sourceData
-    ) external onlyOwner returns (bytes memory) {
+    ) external returns (bytes memory) {
         (address _sender, address _sourceToken, uint256 _chainId, address _receiver, uint256 _transferAmount) = abi
             .decode(sourceData, (address, address, uint256, address, uint256));
 
