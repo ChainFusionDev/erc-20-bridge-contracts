@@ -30,8 +30,8 @@ contract BridgeValidatorFeePool is Initializable, SignerOwnable {
         uint256 _homeChainId
     ) external initializer {
         _setSignerStorage(_signerStorage);
-        setERC20Bridge(_erc20Bridge);
-        setValidatorFeeReceiver(_validatorFeeReceiver);
+        _setERC20Bridge(_erc20Bridge);
+        _setValidatorFeeReceiver(_validatorFeeReceiver);
         homeChainId = _homeChainId;
     }
 
