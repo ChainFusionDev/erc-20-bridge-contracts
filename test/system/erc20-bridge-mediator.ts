@@ -9,7 +9,6 @@ describe('ERC20BridgeMediator', function () {
     const symbol2 = 'NFN';
     const chainId = 111;
     const token1 = '0x0000000000000000000000000000000000000001';
-    const token2 = '0x0000000000000000000000000000000000000002';
 
     const { erc20BridgeMediator } = await deploySystemWithMocks();
 
@@ -22,10 +21,6 @@ describe('ERC20BridgeMediator', function () {
 
     await expect(erc20BridgeMediator.addToken(symbol2, chainId, token1)).to.be.revertedWith(
       'ERC20BridgeMediator: symbol already added'
-    );
-
-    await expect(erc20BridgeMediator.addToken(symbol1, chainId, token2)).to.be.revertedWith(
-      'ERC20BridgeMediator: token already added'
     );
   });
 

@@ -2,12 +2,13 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./SignerOwnable.sol";
 import "./ERC20Bridge.sol";
 import "./Globals.sol";
 
-contract BridgeValidatorFeePool is Initializable, SignerOwnable {
+contract BridgeValidatorFeePool is Initializable, Ownable, SignerOwnable {
     ERC20Bridge public erc20Bridge;
 
     mapping(address => uint256) public limitPerToken;
@@ -43,7 +44,7 @@ contract BridgeValidatorFeePool is Initializable, SignerOwnable {
         _setValidatorFeeReceiver(_validatorFeeReceiver);
     }
 
-    function setLimitPerToken(address _token, uint256 _limit) public onlySigner {
+    function setLimitPerToken(address _token, uint256 _limit) public onlyOwner {
         limitPerToken[_token] = _limit;
         emit LimitPerTokenUpdated(_token, _limit);
     }

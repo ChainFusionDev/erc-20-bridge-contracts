@@ -2,6 +2,7 @@ import { BigNumber } from 'ethers';
 import { ethers, config, network } from 'hardhat';
 import { HttpNetworkConfig } from 'hardhat/types';
 import { Token } from '../../typechain';
+import { Deployer } from './deployer';
 
 const defaultTokenDeploymentParameters: TokenDeploymentParameters = {
   amount: ethers.utils.parseEther('10000'),
@@ -10,6 +11,9 @@ const defaultTokenDeploymentParameters: TokenDeploymentParameters = {
   tokenLimit: ethers.utils.parseEther('0.0001'),
   validatorReward: ethers.utils.parseEther('0.001'),
   liquidityReward: ethers.utils.parseEther('0.001'),
+
+  displayLogs: false,
+  verify: false,
 };
 
 export async function deployToken(options: TokenDeploymentOptions): Promise<Token> {
@@ -28,43 +32,42 @@ export async function deployToken(options: TokenDeploymentOptions): Promise<Toke
 
 export async function setTokenToTokenManager(tokenAddress: string, options: TokenDeploymentOptions): Promise<void> {
   if (options.tokenManagerAddress !== undefined) {
-    console.log('Setting token in TokenManager');
+    const params = resolveParameters(options);
+    const deployer = new Deployer(params.displayLogs);
 
     const tokenManager = await ethers.getContractAt('TokenManager', options.tokenManagerAddress);
-    await (await tokenManager.setToken(tokenAddress, '1')).wait();
-
-    console.log('Successfully seted token \n');
+    await deployer.sendTransaction(tokenManager.setToken(tokenAddress, '1'), 'Setting token in TokenManager');
   }
 }
 
 export async function setTokenFee(tokenAddress: string, options: TokenDeploymentOptions): Promise<void> {
   if (options.feeManagerAddress !== undefined) {
-    console.log('Setting token fee in FeeManager');
-
     const params = resolveParameters(options);
+    const deployer = new Deployer(params.displayLogs);
 
     const feeManager = await ethers.getContractAt('FeeManager', options.feeManagerAddress);
-    await (
-      await feeManager.setTokenFee(tokenAddress, params.tokenFee, params.validatorReward, params.liquidityReward)
-    ).wait();
 
-    console.log('Successfully seted token fee \n');
+    await deployer.sendTransaction(
+      feeManager.setTokenFee(tokenAddress, params.tokenFee, params.validatorReward, params.liquidityReward),
+      'Setting token in FeeManager'
+    );
   }
 }
 
 export async function setLimitPerToken(tokenAddress: string, options: TokenDeploymentOptions): Promise<void> {
   if (options.bridgeValidatorFeePoolAddress !== undefined) {
-    console.log('Setting limit per token in BridgeValidatorFeePool');
-
     const params = resolveParameters(options);
+    const deployer = new Deployer(params.displayLogs);
 
     const bridgeValidatorFeePool = await ethers.getContractAt(
       'BridgeValidatorFeePool',
       options.bridgeValidatorFeePoolAddress
     );
-    await (await bridgeValidatorFeePool.setLimitPerToken(tokenAddress, params.tokenLimit)).wait();
 
-    console.log('Successfully seted limit per token \n');
+    await deployer.sendTransaction(
+      bridgeValidatorFeePool.setLimitPerToken(tokenAddress, params.tokenLimit),
+      'Setting limit per token in BridgeValidatorFeePool'
+    );
   }
 }
 
@@ -78,30 +81,36 @@ export async function addTokenToERC20BridgeMediator(
     const homeSigner = new ethers.Wallet(options.privateKey, homeProvider);
 
     if (networkConfig.chainId !== undefined) {
-      console.log('Adding token to ERC20BridgeMediator');
+      const params = resolveParameters(options);
+      const deployer = new Deployer(params.displayLogs);
 
       const erc20BridgeMediatorFactory = await ethers.getContractFactory('ERC20BridgeMediator', homeSigner);
       const erc20BridgeMediator = erc20BridgeMediatorFactory.attach(options.erc20BridgeMediatorAddress);
 
-      await (await erc20BridgeMediator.addToken(options.symbol, network.config.chainId ?? 1, tokenAddress)).wait();
-
-      console.log('Successfully added token\n');
+      await deployer.sendTransaction(
+        erc20BridgeMediator.addToken(options.symbol, network.config.chainId ?? 1, tokenAddress),
+        'Adding token to ERC20BridgeMediator'
+      );
     }
   }
 }
 
 export async function addLiquidity(token: Token, options: TokenDeploymentOptions): Promise<void> {
   if (options.liquidityPoolsAddress !== undefined) {
-    console.log('Adding liquidity token');
-
     const params = resolveParameters(options);
-
-    await (await token.approve(options.liquidityPoolsAddress, params.liquidityAmount)).wait();
+    const deployer = new Deployer(params.displayLogs);
 
     const liquidityPools = await ethers.getContractAt('LiquidityPools', options.liquidityPoolsAddress);
-    await (await liquidityPools.addLiquidity(token.address, params.liquidityAmount)).wait();
 
-    console.log('Successfully added liquidity token\n');
+    await deployer.sendTransaction(
+      token.approve(options.liquidityPoolsAddress, params.liquidityAmount),
+      'Approving token for LiquidityPools'
+    );
+
+    await deployer.sendTransaction(
+      liquidityPools.addLiquidity(token.address, params.liquidityAmount),
+      'Adding token to LiquidityPools'
+    );
   }
 }
 
@@ -136,6 +145,14 @@ function resolveParameters(options?: TokenDeploymentOptions): TokenDeploymentPar
     parameters.liquidityAmount = options.liquidityAmount;
   }
 
+  if (options.verify !== undefined) {
+    parameters.verify = options.verify;
+  }
+
+  if (options.displayLogs !== undefined) {
+    parameters.displayLogs = options.displayLogs;
+  }
+
   return parameters;
 }
 
@@ -146,6 +163,9 @@ export interface TokenDeploymentParameters {
   tokenLimit: BigNumber;
   validatorReward: BigNumber;
   liquidityReward: BigNumber;
+
+  verify: boolean;
+  displayLogs: boolean;
 }
 
 export interface TokenDeploymentOptions {
@@ -164,4 +184,7 @@ export interface TokenDeploymentOptions {
   tokenLimit?: BigNumber;
   validatorReward?: BigNumber;
   liquidityReward?: BigNumber;
+
+  verify?: boolean;
+  displayLogs?: boolean;
 }

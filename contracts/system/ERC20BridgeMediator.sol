@@ -35,7 +35,6 @@ contract ERC20BridgeMediator is Ownable {
         address token
     ) public onlyOwner {
         require(bytes(tokenToSymbol[chainId][token]).length == 0, "ERC20BridgeMediator: symbol already added");
-        require(symbolToToken[chainId][symbol] == address(0), "ERC20BridgeMediator: token already added");
 
         tokenToSymbol[chainId][token] = symbol;
         symbolToToken[chainId][symbol] = token;

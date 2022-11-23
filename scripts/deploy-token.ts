@@ -8,8 +8,8 @@ import {
 } from './deploy/config';
 
 async function main() {
-    const tokenName = (process.env.TOKEN_NAME || '');
-    const tokenSymbol = (process.env.TOKEN_SYMBOL || '');
+    const tokenName = (process.env.TOKEN_NAME || 'Tether');
+    const tokenSymbol = (process.env.TOKEN_SYMBOL || 'USDT');
     const privateKey = (process.env.PRIVATE_KEY || '');
 
     const chainId = network.config.chainId ?? 1;
@@ -18,6 +18,7 @@ async function main() {
     const contractsConfig = await readContractsConfig();
 
     var options: TokenDeploymentOptions = {
+      displayLogs: true,
       privateKey: privateKey, 
       symbol: tokenSymbol, 
       name: tokenName, 

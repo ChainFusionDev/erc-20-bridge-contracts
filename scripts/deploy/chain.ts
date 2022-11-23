@@ -1,6 +1,14 @@
 import { BigNumber } from 'ethers';
-import { ethers, network } from 'hardhat';
-import { ERC20Bridge, FeeManager, BridgeValidatorFeePool, LiquidityPools, TokenManager } from '../../typechain';
+import { ethers, network, config } from 'hardhat';
+import { HttpNetworkConfig } from 'hardhat/types';
+import {
+  ERC20Bridge,
+  FeeManager,
+  BridgeValidatorFeePool,
+  LiquidityPools,
+  TokenManager,
+  IBridgeApp__factory,
+} from '../../typechain';
 import { Deployer } from './deployer';
 
 const defaultBridgeDeploymentParameters: BridgeDeploymentParameters = {
@@ -11,6 +19,7 @@ const defaultBridgeDeploymentParameters: BridgeDeploymentParameters = {
   bridgeApp: '0x0000000000000000000000000000000000000001',
   relayBridge: '0x0000000000000000000000000000000000000001',
   signerStorage: '0x0000000000000000000000000000000000000001',
+  setApp: false,
 
   displayLogs: false,
   verify: false,
@@ -92,6 +101,21 @@ export async function deployBridgeContracts(options?: BridgeDeploymentOptions): 
     'Initializing BridgeValidatorFeePool'
   );
 
+  if (params.setApp && options?.homeNetwork !== undefined && options.privateKey !== undefined) {
+    const networkConfig = config.networks[options.homeNetwork] as HttpNetworkConfig;
+    const homeProvider = new ethers.providers.JsonRpcProvider(networkConfig.url, networkConfig.chainId);
+    const homeSigner = new ethers.Wallet(options.privateKey, homeProvider);
+
+    if (network.config.chainId !== undefined) {
+      const bridgeApp = IBridgeApp__factory.connect(params.bridgeApp, homeSigner);
+
+      await deployer.sendTransaction(
+        bridgeApp.setContractAddress(network.config.chainId, res.erc20Bridge.address),
+        'Setting bridge address in BridgeApp'
+      );
+    }
+  }
+
   deployer.log('Successfully initialized contracts\n');
 
   if (params.verify) {
@@ -127,14 +151,6 @@ function resolveParameters(options?: BridgeDeploymentOptions): BridgeDeploymentP
     parameters.foundationAddress = options.foundationAddress;
   }
 
-  if (options.displayLogs !== undefined) {
-    parameters.displayLogs = options.displayLogs;
-  }
-
-  if (options.verify !== undefined) {
-    parameters.verify = options.verify;
-  }
-
   if (options.bridgeApp !== undefined) {
     parameters.bridgeApp = options.bridgeApp;
   }
@@ -145,6 +161,18 @@ function resolveParameters(options?: BridgeDeploymentOptions): BridgeDeploymentP
 
   if (options.signerStorage !== undefined) {
     parameters.signerStorage = options.signerStorage;
+  }
+
+  if (options.setApp !== undefined) {
+    parameters.setApp = options.setApp;
+  }
+
+  if (options.displayLogs !== undefined) {
+    parameters.displayLogs = options.displayLogs;
+  }
+
+  if (options.verify !== undefined) {
+    parameters.verify = options.verify;
   }
 
   return parameters;
@@ -168,6 +196,8 @@ export interface BridgeDeploymentParameters {
   bridgeApp: string;
   relayBridge: string;
   signerStorage: string;
+  setApp: boolean;
+
   displayLogs: boolean;
   verify: boolean;
 }
@@ -181,6 +211,10 @@ export interface BridgeDeploymentOptions {
   relayBridge?: string;
   signerStorage?: string;
   displayLogs?: boolean;
+  setApp?: boolean;
+  homeNetwork?: string;
+  privateKey?: string;
+
   verify?: boolean;
   deployMocks?: boolean;
 }
