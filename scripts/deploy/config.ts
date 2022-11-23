@@ -32,6 +32,10 @@ export async function updateContractsConfig(config: ContractsConfig, data: Objec
   }
 }
 
+export async function addTokenToContractsConfig(config: ContractsConfig, symbol: string, address: string) {
+  config[`token${symbol}`] = address;
+}
+
 export async function readChainContractsConfig(chainId: number): Promise<ContractsConfig> {
   try {
     const fileData = await fs.readFile(`contracts-${chainId}.json`);
