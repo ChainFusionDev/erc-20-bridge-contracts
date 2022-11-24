@@ -13,6 +13,7 @@ import "../interfaces/IRelayBridge.sol";
 
 contract ERC20Bridge is Initializable, SignerOwnable {
     mapping(bytes32 => bool) public executed;
+    mapping(bytes32 => bool) public reverted;
 
     address public bridgeAppAddress;
 
@@ -92,28 +93,38 @@ contract ERC20Bridge is Initializable, SignerOwnable {
 
         emit Deposited(msg.sender, _token, _chainId, _receiver, fee, transferAmount);
 
-        bytes memory data = abi.encode(msg.sender, _token, _chainId, _receiver, transferAmount);
+        bytes memory data = abi.encode(msg.sender, _token, _chainId, _receiver, transferAmount, fee);
 
         // solhint-disable-next-line check-send-result
         relayBridge.send(_chainId, block.gaslimit, data);
     }
 
     function execute(uint256, bytes memory data) external onlyRelayBridge {
-        (address _sender, address _token, uint256 _chainId, address _receiver, uint256 transferAmount) = abi.decode(
-            data,
-            (address, address, uint256, address, uint256)
-        );
+        (
+            address _sender,
+            address _token,
+            uint256 _chainId,
+            address _receiver,
+            uint256 transferAmount,
+            uint256 _fee
+        ) = abi.decode(data, (address, address, uint256, address, uint256, uint256));
 
-        _executeTransfer(_sender, data, _token, _chainId, _receiver, transferAmount);
+        _executeTransfer(_sender, data, _token, _chainId, _receiver, transferAmount, _fee);
     }
 
     function revertSend(uint256, bytes memory data) external onlyRelayBridge {
-        (address _sender, address _token, uint256 _chainId, address _receiver, uint256 _amount) = abi.decode(
-            data,
-            (address, address, uint256, address, uint256)
-        );
+        (address _sender, address _token, uint256 _chainId, address _receiver, uint256 _amount, uint256 _fee) = abi
+            .decode(data, (address, address, uint256, address, uint256, uint256));
 
         require(tokenManager.getType(_token) != TokenType.DISABLED, "TokenManager: token is not enabled");
+        bytes32 id = keccak256(abi.encodePacked(_sender, data, _token, _receiver, _amount, _fee));
+
+        if (executed[id] == true) {
+            reverted[id] = true;
+            executed[id] = false;
+
+            return;
+        }
 
         if (tokenManager.getType(_token) == TokenType.MINTED) {
             IERC20MintableBurnable(_token).mint(_sender, _amount);
@@ -161,7 +172,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
 
         emit DepositedNative(msg.sender, NATIVE_TOKEN, _chainId, _receiver, fee, transferAmount);
 
-        bytes memory data = abi.encode(msg.sender, NATIVE_TOKEN, _chainId, _receiver, transferAmount);
+        bytes memory data = abi.encode(msg.sender, NATIVE_TOKEN, _chainId, _receiver, transferAmount, fee);
 
         // solhint-disable-next-line check-send-result
         relayBridge.send(_chainId, block.gaslimit, data);
@@ -169,13 +180,26 @@ contract ERC20Bridge is Initializable, SignerOwnable {
 
     function isExecuted(
         address _sender,
-        bytes calldata _txHash,
+        bytes calldata _data,
         address _token,
         address _receiver,
-        uint256 _amount
+        uint256 _amount,
+        uint256 _fee
     ) public view returns (bool) {
-        bytes32 id = keccak256(abi.encodePacked(_sender, _txHash, _token, _receiver, _amount));
+        bytes32 id = keccak256(abi.encodePacked(_sender, _data, _token, _receiver, _amount, _fee));
         return executed[id];
+    }
+
+    function isReverted(
+        address _sender,
+        bytes calldata _data,
+        address _token,
+        address _receiver,
+        uint256 _amount,
+        uint256 _fee
+    ) public view returns (bool) {
+        bytes32 id = keccak256(abi.encodePacked(_sender, _data, _token, _receiver, _amount, _fee));
+        return reverted[id];
     }
 
     function _setRelayBridge(address _relayBridge) private {
@@ -200,15 +224,15 @@ contract ERC20Bridge is Initializable, SignerOwnable {
 
     function _executeTransfer(
         address _sender,
-        bytes memory _txHash,
+        bytes memory _data,
         address _token,
         uint256 _sourceChainId,
         address _receiver,
-        uint256 _amount
+        uint256 _amount,
+        uint256 _fee
     ) private {
         require(tokenManager.getType(_token) != TokenType.DISABLED, "TokenManager: token is not enabled");
-        bytes32 id = keccak256(abi.encodePacked(_sender, _txHash, _token, _receiver, _amount));
-
+        bytes32 id = keccak256(abi.encodePacked(_sender, _data, _token, _receiver, _amount, _fee));
         executed[id] = true;
 
         if (tokenManager.getType(_token) == TokenType.MINTED) {
