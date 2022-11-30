@@ -30,7 +30,7 @@ var (
 
 // BridgeValidatorFeePoolMetaData contains all meta data concerning the BridgeValidatorFeePool contract.
 var BridgeValidatorFeePoolMetaData = &bind.MetaData{
-	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Collected\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"erc20Bridge\",\"type\":\"address\"}],\"name\":\"ERC20BridgeUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"version\",\"type\":\"uint8\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"limit\",\"type\":\"uint256\"}],\"name\":\"LimitPerTokenUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"validatorFeeReceiver\",\"type\":\"address\"}],\"name\":\"ValidatorFeeReceiverUpdated\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"}],\"name\":\"collect\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"erc20Bridge\",\"outputs\":[{\"internalType\":\"contractERC20Bridge\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_signerStorage\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_erc20Bridge\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_validatorFeeReceiver\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"limitPerToken\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_erc20Bridge\",\"type\":\"address\"}],\"name\":\"setERC20Bridge\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_limit\",\"type\":\"uint256\"}],\"name\":\"setLimitPerToken\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_validatorFeeReceiver\",\"type\":\"address\"}],\"name\":\"setValidatorFeeReceiver\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"signerStorage\",\"outputs\":[{\"internalType\":\"contractISignerStorage\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"validatorFeeReceiver\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]",
+	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Collected\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"erc20Bridge\",\"type\":\"address\"}],\"name\":\"ERC20BridgeUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"version\",\"type\":\"uint8\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"limit\",\"type\":\"uint256\"}],\"name\":\"LimitPerTokenUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"validatorFeeReceiver\",\"type\":\"address\"}],\"name\":\"ValidatorFeeReceiverUpdated\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"}],\"name\":\"collect\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"erc20Bridge\",\"outputs\":[{\"internalType\":\"contractERC20Bridge\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"homeChainId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_signerStorage\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_erc20Bridge\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_validatorFeeReceiver\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_homeChainId\",\"type\":\"uint256\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"limitPerToken\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_erc20Bridge\",\"type\":\"address\"}],\"name\":\"setERC20Bridge\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_limit\",\"type\":\"uint256\"}],\"name\":\"setLimitPerToken\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_validatorFeeReceiver\",\"type\":\"address\"}],\"name\":\"setValidatorFeeReceiver\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"signerStorage\",\"outputs\":[{\"internalType\":\"contractISignerStorage\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"validatorFeeReceiver\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]",
 }
 
 // BridgeValidatorFeePoolABI is the input ABI used to generate the binding from.
@@ -210,6 +210,37 @@ func (_BridgeValidatorFeePool *BridgeValidatorFeePoolCallerSession) Erc20Bridge(
 	return _BridgeValidatorFeePool.Contract.Erc20Bridge(&_BridgeValidatorFeePool.CallOpts)
 }
 
+// HomeChainId is a free data retrieval call binding the contract method 0xef126967.
+//
+// Solidity: function homeChainId() view returns(uint256)
+func (_BridgeValidatorFeePool *BridgeValidatorFeePoolCaller) HomeChainId(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _BridgeValidatorFeePool.contract.Call(opts, &out, "homeChainId")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// HomeChainId is a free data retrieval call binding the contract method 0xef126967.
+//
+// Solidity: function homeChainId() view returns(uint256)
+func (_BridgeValidatorFeePool *BridgeValidatorFeePoolSession) HomeChainId() (*big.Int, error) {
+	return _BridgeValidatorFeePool.Contract.HomeChainId(&_BridgeValidatorFeePool.CallOpts)
+}
+
+// HomeChainId is a free data retrieval call binding the contract method 0xef126967.
+//
+// Solidity: function homeChainId() view returns(uint256)
+func (_BridgeValidatorFeePool *BridgeValidatorFeePoolCallerSession) HomeChainId() (*big.Int, error) {
+	return _BridgeValidatorFeePool.Contract.HomeChainId(&_BridgeValidatorFeePool.CallOpts)
+}
+
 // LimitPerToken is a free data retrieval call binding the contract method 0x0bb51dd5.
 //
 // Solidity: function limitPerToken(address ) view returns(uint256)
@@ -239,6 +270,37 @@ func (_BridgeValidatorFeePool *BridgeValidatorFeePoolSession) LimitPerToken(arg0
 // Solidity: function limitPerToken(address ) view returns(uint256)
 func (_BridgeValidatorFeePool *BridgeValidatorFeePoolCallerSession) LimitPerToken(arg0 common.Address) (*big.Int, error) {
 	return _BridgeValidatorFeePool.Contract.LimitPerToken(&_BridgeValidatorFeePool.CallOpts, arg0)
+}
+
+// Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
+//
+// Solidity: function owner() view returns(address)
+func (_BridgeValidatorFeePool *BridgeValidatorFeePoolCaller) Owner(opts *bind.CallOpts) (common.Address, error) {
+	var out []interface{}
+	err := _BridgeValidatorFeePool.contract.Call(opts, &out, "owner")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
+//
+// Solidity: function owner() view returns(address)
+func (_BridgeValidatorFeePool *BridgeValidatorFeePoolSession) Owner() (common.Address, error) {
+	return _BridgeValidatorFeePool.Contract.Owner(&_BridgeValidatorFeePool.CallOpts)
+}
+
+// Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
+//
+// Solidity: function owner() view returns(address)
+func (_BridgeValidatorFeePool *BridgeValidatorFeePoolCallerSession) Owner() (common.Address, error) {
+	return _BridgeValidatorFeePool.Contract.Owner(&_BridgeValidatorFeePool.CallOpts)
 }
 
 // SignerStorage is a free data retrieval call binding the contract method 0x449a23c7.
@@ -324,25 +386,46 @@ func (_BridgeValidatorFeePool *BridgeValidatorFeePoolTransactorSession) Collect(
 	return _BridgeValidatorFeePool.Contract.Collect(&_BridgeValidatorFeePool.TransactOpts, _token)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xc0c53b8b.
+// Initialize is a paid mutator transaction binding the contract method 0xcf756fdf.
 //
-// Solidity: function initialize(address _signerStorage, address _erc20Bridge, address _validatorFeeReceiver) returns()
-func (_BridgeValidatorFeePool *BridgeValidatorFeePoolTransactor) Initialize(opts *bind.TransactOpts, _signerStorage common.Address, _erc20Bridge common.Address, _validatorFeeReceiver common.Address) (*types.Transaction, error) {
-	return _BridgeValidatorFeePool.contract.Transact(opts, "initialize", _signerStorage, _erc20Bridge, _validatorFeeReceiver)
+// Solidity: function initialize(address _signerStorage, address _erc20Bridge, address _validatorFeeReceiver, uint256 _homeChainId) returns()
+func (_BridgeValidatorFeePool *BridgeValidatorFeePoolTransactor) Initialize(opts *bind.TransactOpts, _signerStorage common.Address, _erc20Bridge common.Address, _validatorFeeReceiver common.Address, _homeChainId *big.Int) (*types.Transaction, error) {
+	return _BridgeValidatorFeePool.contract.Transact(opts, "initialize", _signerStorage, _erc20Bridge, _validatorFeeReceiver, _homeChainId)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xc0c53b8b.
+// Initialize is a paid mutator transaction binding the contract method 0xcf756fdf.
 //
-// Solidity: function initialize(address _signerStorage, address _erc20Bridge, address _validatorFeeReceiver) returns()
-func (_BridgeValidatorFeePool *BridgeValidatorFeePoolSession) Initialize(_signerStorage common.Address, _erc20Bridge common.Address, _validatorFeeReceiver common.Address) (*types.Transaction, error) {
-	return _BridgeValidatorFeePool.Contract.Initialize(&_BridgeValidatorFeePool.TransactOpts, _signerStorage, _erc20Bridge, _validatorFeeReceiver)
+// Solidity: function initialize(address _signerStorage, address _erc20Bridge, address _validatorFeeReceiver, uint256 _homeChainId) returns()
+func (_BridgeValidatorFeePool *BridgeValidatorFeePoolSession) Initialize(_signerStorage common.Address, _erc20Bridge common.Address, _validatorFeeReceiver common.Address, _homeChainId *big.Int) (*types.Transaction, error) {
+	return _BridgeValidatorFeePool.Contract.Initialize(&_BridgeValidatorFeePool.TransactOpts, _signerStorage, _erc20Bridge, _validatorFeeReceiver, _homeChainId)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xc0c53b8b.
+// Initialize is a paid mutator transaction binding the contract method 0xcf756fdf.
 //
-// Solidity: function initialize(address _signerStorage, address _erc20Bridge, address _validatorFeeReceiver) returns()
-func (_BridgeValidatorFeePool *BridgeValidatorFeePoolTransactorSession) Initialize(_signerStorage common.Address, _erc20Bridge common.Address, _validatorFeeReceiver common.Address) (*types.Transaction, error) {
-	return _BridgeValidatorFeePool.Contract.Initialize(&_BridgeValidatorFeePool.TransactOpts, _signerStorage, _erc20Bridge, _validatorFeeReceiver)
+// Solidity: function initialize(address _signerStorage, address _erc20Bridge, address _validatorFeeReceiver, uint256 _homeChainId) returns()
+func (_BridgeValidatorFeePool *BridgeValidatorFeePoolTransactorSession) Initialize(_signerStorage common.Address, _erc20Bridge common.Address, _validatorFeeReceiver common.Address, _homeChainId *big.Int) (*types.Transaction, error) {
+	return _BridgeValidatorFeePool.Contract.Initialize(&_BridgeValidatorFeePool.TransactOpts, _signerStorage, _erc20Bridge, _validatorFeeReceiver, _homeChainId)
+}
+
+// RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
+//
+// Solidity: function renounceOwnership() returns()
+func (_BridgeValidatorFeePool *BridgeValidatorFeePoolTransactor) RenounceOwnership(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _BridgeValidatorFeePool.contract.Transact(opts, "renounceOwnership")
+}
+
+// RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
+//
+// Solidity: function renounceOwnership() returns()
+func (_BridgeValidatorFeePool *BridgeValidatorFeePoolSession) RenounceOwnership() (*types.Transaction, error) {
+	return _BridgeValidatorFeePool.Contract.RenounceOwnership(&_BridgeValidatorFeePool.TransactOpts)
+}
+
+// RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
+//
+// Solidity: function renounceOwnership() returns()
+func (_BridgeValidatorFeePool *BridgeValidatorFeePoolTransactorSession) RenounceOwnership() (*types.Transaction, error) {
+	return _BridgeValidatorFeePool.Contract.RenounceOwnership(&_BridgeValidatorFeePool.TransactOpts)
 }
 
 // SetERC20Bridge is a paid mutator transaction binding the contract method 0xe88866a5.
@@ -406,6 +489,27 @@ func (_BridgeValidatorFeePool *BridgeValidatorFeePoolSession) SetValidatorFeeRec
 // Solidity: function setValidatorFeeReceiver(address _validatorFeeReceiver) returns()
 func (_BridgeValidatorFeePool *BridgeValidatorFeePoolTransactorSession) SetValidatorFeeReceiver(_validatorFeeReceiver common.Address) (*types.Transaction, error) {
 	return _BridgeValidatorFeePool.Contract.SetValidatorFeeReceiver(&_BridgeValidatorFeePool.TransactOpts, _validatorFeeReceiver)
+}
+
+// TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
+//
+// Solidity: function transferOwnership(address newOwner) returns()
+func (_BridgeValidatorFeePool *BridgeValidatorFeePoolTransactor) TransferOwnership(opts *bind.TransactOpts, newOwner common.Address) (*types.Transaction, error) {
+	return _BridgeValidatorFeePool.contract.Transact(opts, "transferOwnership", newOwner)
+}
+
+// TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
+//
+// Solidity: function transferOwnership(address newOwner) returns()
+func (_BridgeValidatorFeePool *BridgeValidatorFeePoolSession) TransferOwnership(newOwner common.Address) (*types.Transaction, error) {
+	return _BridgeValidatorFeePool.Contract.TransferOwnership(&_BridgeValidatorFeePool.TransactOpts, newOwner)
+}
+
+// TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
+//
+// Solidity: function transferOwnership(address newOwner) returns()
+func (_BridgeValidatorFeePool *BridgeValidatorFeePoolTransactorSession) TransferOwnership(newOwner common.Address) (*types.Transaction, error) {
+	return _BridgeValidatorFeePool.Contract.TransferOwnership(&_BridgeValidatorFeePool.TransactOpts, newOwner)
 }
 
 // Receive is a paid mutator transaction binding the contract receive function.
@@ -961,6 +1065,159 @@ func (_BridgeValidatorFeePool *BridgeValidatorFeePoolFilterer) WatchLimitPerToke
 func (_BridgeValidatorFeePool *BridgeValidatorFeePoolFilterer) ParseLimitPerTokenUpdated(log types.Log) (*BridgeValidatorFeePoolLimitPerTokenUpdated, error) {
 	event := new(BridgeValidatorFeePoolLimitPerTokenUpdated)
 	if err := _BridgeValidatorFeePool.contract.UnpackLog(event, "LimitPerTokenUpdated", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// BridgeValidatorFeePoolOwnershipTransferredIterator is returned from FilterOwnershipTransferred and is used to iterate over the raw logs and unpacked data for OwnershipTransferred events raised by the BridgeValidatorFeePool contract.
+type BridgeValidatorFeePoolOwnershipTransferredIterator struct {
+	Event *BridgeValidatorFeePoolOwnershipTransferred // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *BridgeValidatorFeePoolOwnershipTransferredIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(BridgeValidatorFeePoolOwnershipTransferred)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(BridgeValidatorFeePoolOwnershipTransferred)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *BridgeValidatorFeePoolOwnershipTransferredIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *BridgeValidatorFeePoolOwnershipTransferredIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// BridgeValidatorFeePoolOwnershipTransferred represents a OwnershipTransferred event raised by the BridgeValidatorFeePool contract.
+type BridgeValidatorFeePoolOwnershipTransferred struct {
+	PreviousOwner common.Address
+	NewOwner      common.Address
+	Raw           types.Log // Blockchain specific contextual infos
+}
+
+// FilterOwnershipTransferred is a free log retrieval operation binding the contract event 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0.
+//
+// Solidity: event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
+func (_BridgeValidatorFeePool *BridgeValidatorFeePoolFilterer) FilterOwnershipTransferred(opts *bind.FilterOpts, previousOwner []common.Address, newOwner []common.Address) (*BridgeValidatorFeePoolOwnershipTransferredIterator, error) {
+
+	var previousOwnerRule []interface{}
+	for _, previousOwnerItem := range previousOwner {
+		previousOwnerRule = append(previousOwnerRule, previousOwnerItem)
+	}
+	var newOwnerRule []interface{}
+	for _, newOwnerItem := range newOwner {
+		newOwnerRule = append(newOwnerRule, newOwnerItem)
+	}
+
+	logs, sub, err := _BridgeValidatorFeePool.contract.FilterLogs(opts, "OwnershipTransferred", previousOwnerRule, newOwnerRule)
+	if err != nil {
+		return nil, err
+	}
+	return &BridgeValidatorFeePoolOwnershipTransferredIterator{contract: _BridgeValidatorFeePool.contract, event: "OwnershipTransferred", logs: logs, sub: sub}, nil
+}
+
+// WatchOwnershipTransferred is a free log subscription operation binding the contract event 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0.
+//
+// Solidity: event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
+func (_BridgeValidatorFeePool *BridgeValidatorFeePoolFilterer) WatchOwnershipTransferred(opts *bind.WatchOpts, sink chan<- *BridgeValidatorFeePoolOwnershipTransferred, previousOwner []common.Address, newOwner []common.Address) (event.Subscription, error) {
+
+	var previousOwnerRule []interface{}
+	for _, previousOwnerItem := range previousOwner {
+		previousOwnerRule = append(previousOwnerRule, previousOwnerItem)
+	}
+	var newOwnerRule []interface{}
+	for _, newOwnerItem := range newOwner {
+		newOwnerRule = append(newOwnerRule, newOwnerItem)
+	}
+
+	logs, sub, err := _BridgeValidatorFeePool.contract.WatchLogs(opts, "OwnershipTransferred", previousOwnerRule, newOwnerRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(BridgeValidatorFeePoolOwnershipTransferred)
+				if err := _BridgeValidatorFeePool.contract.UnpackLog(event, "OwnershipTransferred", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseOwnershipTransferred is a log parse operation binding the contract event 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0.
+//
+// Solidity: event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
+func (_BridgeValidatorFeePool *BridgeValidatorFeePoolFilterer) ParseOwnershipTransferred(log types.Log) (*BridgeValidatorFeePoolOwnershipTransferred, error) {
+	event := new(BridgeValidatorFeePoolOwnershipTransferred)
+	if err := _BridgeValidatorFeePool.contract.UnpackLog(event, "OwnershipTransferred", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
