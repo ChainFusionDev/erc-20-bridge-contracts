@@ -35,7 +35,7 @@ describe('BridgeValidatorFeePool', function () {
     expect(await bridgeValidatorFeePool.validatorFeeReceiver()).to.be.equal(validator.address);
 
     await expect(bridgeValidatorFeePoolByUser.setLimitPerToken(mockToken.address, tokenLimit)).to.be.revertedWith(
-      'SignerOwnable: only signer'
+      'Ownable: caller is not the owner'
     );
     await expect(bridgeValidatorFeePool.setLimitPerToken(mockToken.address, tokenLimit))
       .to.emit(bridgeValidatorFeePool, 'LimitPerTokenUpdated')
