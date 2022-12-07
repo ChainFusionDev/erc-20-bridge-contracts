@@ -41,12 +41,6 @@ The second script is deployed each time for a new chain, deploys the main contra
 $ npx hardhat --network bg1 run scripts/deploy-chain.ts
 ```
 
-The third script is also deployed every time for a new chain, sets the Chain ID and address of the deployed ERC20Bridge in the BridgeApp contract, and completes the registration of the application in the new chain.
-
-```
-$ CHAIN_ID=123 npx hardhat --network bg1 run scripts/set-app.ts
-```
-
 ### Verify Contracts
 
 To verify contracts, you need to specify network, contract address and constructor parameters (if present).
