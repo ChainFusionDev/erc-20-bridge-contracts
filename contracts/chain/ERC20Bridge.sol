@@ -12,6 +12,7 @@ import "../interfaces/IERC20MintableBurnable.sol";
 import "../interfaces/IRelayBridge.sol";
 
 contract ERC20Bridge is Initializable, SignerOwnable {
+    mapping(bytes32 => bool) public sent;
     mapping(bytes32 => bool) public executed;
     mapping(bytes32 => bool) public reverted;
 
@@ -82,6 +83,9 @@ contract ERC20Bridge is Initializable, SignerOwnable {
 
         uint256 transferAmount = _amount - fee;
 
+        bytes32 id = keccak256(abi.encodePacked(msg.sender, _token, _chainId, _receiver, transferAmount, fee));
+        sent[id] = true;
+
         if (tokenManager.getType(_token) == TokenType.MINTED) {
             IERC20MintableBurnable(_token).burnFrom(msg.sender, transferAmount);
         } else {
@@ -119,12 +123,9 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         require(tokenManager.getType(_token) != TokenType.DISABLED, "TokenManager: token is not enabled");
         bytes32 id = keccak256(abi.encodePacked(_sender, data, _token, _receiver, _amount, _fee));
 
-        if (executed[id] == true) {
-            reverted[id] = true;
-            executed[id] = false;
-
-            return;
-        }
+        require(sent[id], "ERC20Bridge: can't revert, should be deposited");
+        require(!reverted[id], "ERC20Bridge: already reverted");
+        reverted[id] = true;
 
         if (tokenManager.getType(_token) == TokenType.MINTED) {
             IERC20MintableBurnable(_token).mint(_sender, _amount);
@@ -233,6 +234,8 @@ contract ERC20Bridge is Initializable, SignerOwnable {
     ) private {
         require(tokenManager.getType(_token) != TokenType.DISABLED, "TokenManager: token is not enabled");
         bytes32 id = keccak256(abi.encodePacked(_sender, _data, _token, _receiver, _amount, _fee));
+
+        require(!executed[id], "ERC20Bridge: already executed");
         executed[id] = true;
 
         if (tokenManager.getType(_token) == TokenType.MINTED) {
