@@ -53,8 +53,8 @@ describe('ERC20Bridge', function () {
 
     const abiCoder = ethers.utils.defaultAbiCoder;
     const data = abiCoder.encode(
-      ['address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
-      [sender.address, mockToken.address, mockChainId, receiver.address, transferAmount, fee]
+      ['uint256', 'address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
+      [nonce, sender.address, mockToken.address, mockChainId, receiver.address, transferAmount, fee]
     );
 
     const dataForHash = abiCoder.encode(
@@ -94,18 +94,18 @@ describe('ERC20Bridge', function () {
 
     const abiCoder = ethers.utils.defaultAbiCoder;
     const data = abiCoder.encode(
-      ['address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
-      [sender.address, mockToken.address, mockChainId, receiver.address, transferAmount, fee]
+      ['uint256', 'address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
+      [0, sender.address, mockToken.address, mockChainId, receiver.address, transferAmount, fee]
     );
 
     const dataMintableToken = abiCoder.encode(
-      ['address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
-      [sender.address, mockMintableBurnableToken.address, mockChainId, receiver.address, transferAmount, mintFee]
+      ['uint256', 'address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
+      [1, sender.address, mockMintableBurnableToken.address, mockChainId, receiver.address, transferAmount, mintFee]
     );
 
     const dataNativeToken = abiCoder.encode(
-      ['address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
-      [sender.address, NATIVE_TOKEN, mockChainId, receiver.address, transferAmount, nativeFee]
+      ['uint256', 'address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
+      [2, sender.address, NATIVE_TOKEN, mockChainId, receiver.address, transferAmount, nativeFee]
     );
 
     const hashToken = await mockRelayBridge.dataHash(
@@ -219,6 +219,8 @@ describe('ERC20Bridge', function () {
 
     const depositAmount = utils.parseEther('1');
     const transferAmount = utils.parseEther('0.99');
+    const sourceChain = network.config.chainId;
+    const nonce = 0;
 
     const { mockChainId, erc20Bridge, mockToken, liquidityPools, feeManager, mockRelayBridge } =
       await deployBridgeWithMocks();
@@ -227,8 +229,8 @@ describe('ERC20Bridge', function () {
 
     const abiCoder = ethers.utils.defaultAbiCoder;
     const data = abiCoder.encode(
-      ['address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
-      [sender.address, mockToken.address, mockChainId, receiver.address, transferAmount, fee]
+      ['uint256', 'address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
+      [nonce, sender.address, mockToken.address, mockChainId, receiver.address, transferAmount, fee]
     );
 
     await mockToken.approve(erc20Bridge.address, depositAmount);
@@ -244,27 +246,9 @@ describe('ERC20Bridge', function () {
 
     await erc20Bridge.setRelayBridge(sender.address);
 
-    expect(
-      await erc20Bridge.isReverted(
-        sender.address,
-        mockToken.address,
-        mockChainId,
-        receiver.address,
-        transferAmount,
-        fee
-      )
-    ).to.equal(false);
+    expect(await erc20Bridge.isReverted(nonce, Number(sourceChain), mockChainId)).to.equal(false);
     await erc20Bridge.revertSend(mockChainId, data);
-    expect(
-      await erc20Bridge.isReverted(
-        sender.address,
-        mockToken.address,
-        mockChainId,
-        receiver.address,
-        transferAmount,
-        fee
-      )
-    ).to.equal(true);
+    expect(await erc20Bridge.isReverted(nonce, Number(sourceChain), mockChainId)).to.equal(true);
 
     await erc20Bridge.setRelayBridge(sender.address);
     await expect(erc20Bridge.revertSend(mockChainId, data)).to.be.revertedWith('ERC20Bridge: already reverted');
@@ -277,6 +261,7 @@ describe('ERC20Bridge', function () {
     const depositAmount = utils.parseEther('1');
     const transferAmount = utils.parseEther('0.99');
     const NATIVE_TOKEN = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
+    const nonce = 0;
 
     const { mockChainId, erc20Bridge, liquidityPools, mockRelayBridge, tokenManager, feeManager } =
       await deployBridgeWithMocks();
@@ -285,8 +270,8 @@ describe('ERC20Bridge', function () {
 
     const abiCoder = ethers.utils.defaultAbiCoder;
     const dataNativeToken = abiCoder.encode(
-      ['address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
-      [sender.address, NATIVE_TOKEN, mockChainId, receiver.address, transferAmount, fee]
+      ['uint256', 'address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
+      [nonce, sender.address, NATIVE_TOKEN, mockChainId, receiver.address, transferAmount, fee]
     );
 
     await tokenManager.setToken(NATIVE_TOKEN, 1);
@@ -317,6 +302,8 @@ describe('ERC20Bridge', function () {
     const [sender, receiver, user] = await ethers.getSigners();
     const depositAmount = utils.parseEther('1');
     const transferAmount = utils.parseEther('0.99');
+    const sourceChain = network.config.chainId;
+    const nonce = 0;
 
     const { mockChainId, mockToken, erc20Bridge, liquidityPools, tokenManager, mockRelayBridge, feeManager } =
       await deployBridgeWithMocks();
@@ -325,8 +312,8 @@ describe('ERC20Bridge', function () {
 
     const abiCoder = ethers.utils.defaultAbiCoder;
     const data = abiCoder.encode(
-      ['address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
-      [sender.address, mockToken.address, mockChainId, receiver.address, transferAmount, fee]
+      ['uint256', 'address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
+      [nonce, sender.address, mockToken.address, mockChainId, receiver.address, transferAmount, fee]
     );
 
     expect(await tokenManager.getType(mockToken.address)).to.equal(1);
@@ -357,16 +344,7 @@ describe('ERC20Bridge', function () {
     const receiverBalanceAfterExecute = await mockToken.balanceOf(receiver.address);
     expect(receiverBalanceAfterExecute.sub(receiverBalanceBeforeExecute)).to.equal(transferAmount);
 
-    expect(
-      await erc20Bridge.isExecuted(
-        sender.address,
-        mockToken.address,
-        mockChainId,
-        receiver.address,
-        transferAmount,
-        fee
-      )
-    ).to.equal(true);
+    expect(await erc20Bridge.isExecuted(nonce, mockChainId, Number(sourceChain))).to.equal(true);
 
     await expect(erc20Bridge.connect(signer).execute(mockChainId, data)).to.be.revertedWith(
       'ERC20Bridge: already executed'
@@ -377,6 +355,8 @@ describe('ERC20Bridge', function () {
     const [sender, receiver] = await ethers.getSigners();
     const depositAmount = utils.parseEther('1');
     const transferAmount = utils.parseEther('0.99');
+    const sourceChain = network.config.chainId;
+    const nonce = 0;
 
     const { mockChainId, mockToken, erc20Bridge, liquidityPools, tokenManager, mockRelayBridge, feeManager } =
       await deployBridgeWithMocks();
@@ -385,8 +365,8 @@ describe('ERC20Bridge', function () {
 
     const abiCoder = ethers.utils.defaultAbiCoder;
     const data = abiCoder.encode(
-      ['address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
-      [sender.address, mockToken.address, mockChainId, receiver.address, transferAmount, fee]
+      ['uint256', 'address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
+      [nonce, sender.address, mockToken.address, mockChainId, receiver.address, transferAmount, fee]
     );
 
     expect(await tokenManager.getType(mockToken.address)).to.equal(1);
@@ -412,16 +392,7 @@ describe('ERC20Bridge', function () {
       .to.emit(erc20Bridge, 'Transferred')
       .withArgs(sender.address, mockToken.address, mockChainId, receiver.address, transferAmount);
 
-    expect(
-      await erc20Bridge.isExecuted(
-        sender.address,
-        mockToken.address,
-        mockChainId,
-        receiver.address,
-        transferAmount,
-        fee
-      )
-    ).to.equal(true);
+    expect(await erc20Bridge.isExecuted(nonce, mockChainId, Number(sourceChain))).to.equal(true);
   });
 
   it('should deposit supported tokens to bridge', async function () {
@@ -449,6 +420,7 @@ describe('ERC20Bridge', function () {
     const depositAmount = utils.parseEther('1');
     const initialSupply = utils.parseEther('1');
     const transferAmount = utils.parseEther('0.99');
+    const nonce = 0;
 
     const { mockChainId, mockMintableBurnableToken, erc20Bridge, mockRelayBridge, feeManager } =
       await deployBridgeWithMocks();
@@ -457,8 +429,8 @@ describe('ERC20Bridge', function () {
 
     const abiCoder = ethers.utils.defaultAbiCoder;
     const dataMintableToken = abiCoder.encode(
-      ['address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
-      [sender.address, mockMintableBurnableToken.address, mockChainId, receiver.address, transferAmount, fee]
+      ['uint256', 'address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
+      [nonce, sender.address, mockMintableBurnableToken.address, mockChainId, receiver.address, transferAmount, fee]
     );
 
     await mockMintableBurnableToken.mint(sender.address, initialSupply);
@@ -493,6 +465,8 @@ describe('ERC20Bridge', function () {
     const depositAmountZero = utils.parseEther('0');
     const transferAmount = utils.parseEther('0.99');
     const NATIVE_TOKEN = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
+    const sourceChain = network.config.chainId;
+    const nonce = 0;
 
     const { mockChainId, erc20Bridge, liquidityPools, mockRelayBridge, tokenManager, feeManager } =
       await deployBridgeWithMocks();
@@ -501,8 +475,8 @@ describe('ERC20Bridge', function () {
 
     const abiCoder = ethers.utils.defaultAbiCoder;
     const data = abiCoder.encode(
-      ['address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
-      [sender.address, NATIVE_TOKEN, mockChainId, receiver.address, transferAmount, fee]
+      ['uint256', 'address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
+      [nonce, sender.address, NATIVE_TOKEN, mockChainId, receiver.address, transferAmount, fee]
     );
 
     await tokenManager.setToken(NATIVE_TOKEN, 1);
@@ -538,8 +512,6 @@ describe('ERC20Bridge', function () {
     const balanceReceiverAfter = await ethers.provider.getBalance(receiver.address);
     expect(balanceReceiverAfter).to.equal(balanceReceiverBefore.add(transferAmount));
 
-    expect(
-      await erc20Bridge.isExecuted(sender.address, NATIVE_TOKEN, mockChainId, receiver.address, transferAmount, fee)
-    ).to.equal(true);
+    expect(await erc20Bridge.isExecuted(nonce, mockChainId, Number(sourceChain))).to.equal(true);
   });
 });

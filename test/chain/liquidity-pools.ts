@@ -172,6 +172,7 @@ describe('LiquidityPools', function () {
     const sourceChainId = 5;
     const transferAmount = utils.parseEther('0.99');
     const nullAddress = '0x0000000000000000000000000000000000000000';
+    const nonce = 0;
 
     const { mockChainId, mockToken, liquidityPools, erc20Bridge, feeManager, mockRelayBridge } =
       await deployBridgeWithMocks();
@@ -180,13 +181,13 @@ describe('LiquidityPools', function () {
 
     const abiCoder = ethers.utils.defaultAbiCoder;
     const data = abiCoder.encode(
-      ['address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
-      [sender.address, mockToken.address, mockChainId, receiver.address, transferAmount, fee]
+      ['uint256', 'address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
+      [nonce, sender.address, mockToken.address, mockChainId, receiver.address, transferAmount, fee]
     );
 
     const dataNullAddress = abiCoder.encode(
-      ['address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
-      [sender.address, mockToken.address, mockChainId, nullAddress, transferAmount, fee]
+      ['uint256', 'address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
+      [nonce, sender.address, mockToken.address, mockChainId, nullAddress, transferAmount, fee]
     );
 
     await hre.network.provider.request({
