@@ -220,7 +220,8 @@ describe('ERC20Bridge', function () {
     const depositAmount = utils.parseEther('1');
     const transferAmount = utils.parseEther('0.99');
 
-    const { mockChainId, erc20Bridge, mockToken, liquidityPools, feeManager } = await deployBridgeWithMocks();
+    const { mockChainId, erc20Bridge, mockToken, liquidityPools, feeManager, mockRelayBridge } =
+      await deployBridgeWithMocks();
 
     const fee = await feeManager.calculateFee(mockToken.address, transferAmount);
 
@@ -232,29 +233,42 @@ describe('ERC20Bridge', function () {
 
     await mockToken.approve(erc20Bridge.address, depositAmount);
     await mockToken.approve(liquidityPools.address, depositAmount);
+
+    await erc20Bridge.setRelayBridge(sender.address);
+    await expect(erc20Bridge.revertSend(mockChainId, data)).to.be.revertedWith(
+      "ERC20Bridge: can't revert, should be deposited"
+    );
+    await erc20Bridge.setRelayBridge(mockRelayBridge.address);
+
     await erc20Bridge.deposit(mockToken.address, mockChainId, receiver.address, depositAmount);
 
     await erc20Bridge.setRelayBridge(sender.address);
 
     expect(
-      await erc20Bridge.isExecuted(sender.address, data, mockToken.address, receiver.address, transferAmount, fee)
-    ).to.equal(false);
-    await erc20Bridge.execute(mockChainId, data);
-    expect(
-      await erc20Bridge.isExecuted(sender.address, data, mockToken.address, receiver.address, transferAmount, fee)
-    ).to.equal(true);
-
-    expect(
-      await erc20Bridge.isReverted(sender.address, data, mockToken.address, receiver.address, transferAmount, fee)
+      await erc20Bridge.isReverted(
+        sender.address,
+        mockToken.address,
+        mockChainId,
+        receiver.address,
+        transferAmount,
+        fee
+      )
     ).to.equal(false);
     await erc20Bridge.revertSend(mockChainId, data);
     expect(
-      await erc20Bridge.isReverted(sender.address, data, mockToken.address, receiver.address, transferAmount, fee)
+      await erc20Bridge.isReverted(
+        sender.address,
+        mockToken.address,
+        mockChainId,
+        receiver.address,
+        transferAmount,
+        fee
+      )
     ).to.equal(true);
 
-    expect(
-      await erc20Bridge.isExecuted(sender.address, data, mockToken.address, receiver.address, transferAmount, fee)
-    ).to.equal(false);
+    await erc20Bridge.setRelayBridge(sender.address);
+    await expect(erc20Bridge.revertSend(mockChainId, data)).to.be.revertedWith('ERC20Bridge: already reverted');
+    await erc20Bridge.setRelayBridge(mockRelayBridge.address);
   });
 
   it('should emit event Reverted native token', async function () {
@@ -319,7 +333,6 @@ describe('ERC20Bridge', function () {
 
     await mockToken.approve(erc20Bridge.address, depositAmount);
     await mockToken.approve(liquidityPools.address, depositAmount);
-    await liquidityPools.addLiquidity(mockToken.address, depositAmount);
     await erc20Bridge.deposit(mockToken.address, mockChainId, receiver.address, depositAmount);
 
     const receiverBalanceBeforeExecute = await mockToken.balanceOf(receiver.address);
@@ -345,8 +358,19 @@ describe('ERC20Bridge', function () {
     expect(receiverBalanceAfterExecute.sub(receiverBalanceBeforeExecute)).to.equal(transferAmount);
 
     expect(
-      await erc20Bridge.isExecuted(sender.address, data, mockToken.address, receiver.address, transferAmount, fee)
+      await erc20Bridge.isExecuted(
+        sender.address,
+        mockToken.address,
+        mockChainId,
+        receiver.address,
+        transferAmount,
+        fee
+      )
     ).to.equal(true);
+
+    await expect(erc20Bridge.connect(signer).execute(mockChainId, data)).to.be.revertedWith(
+      'ERC20Bridge: already executed'
+    );
   });
 
   it('should execute transfer', async function () {
@@ -389,7 +413,14 @@ describe('ERC20Bridge', function () {
       .withArgs(sender.address, mockToken.address, mockChainId, receiver.address, transferAmount);
 
     expect(
-      await erc20Bridge.isExecuted(sender.address, data, mockToken.address, receiver.address, transferAmount, fee)
+      await erc20Bridge.isExecuted(
+        sender.address,
+        mockToken.address,
+        mockChainId,
+        receiver.address,
+        transferAmount,
+        fee
+      )
     ).to.equal(true);
   });
 
@@ -508,7 +539,7 @@ describe('ERC20Bridge', function () {
     expect(balanceReceiverAfter).to.equal(balanceReceiverBefore.add(transferAmount));
 
     expect(
-      await erc20Bridge.isExecuted(sender.address, data, NATIVE_TOKEN, receiver.address, transferAmount, fee)
+      await erc20Bridge.isExecuted(sender.address, NATIVE_TOKEN, mockChainId, receiver.address, transferAmount, fee)
     ).to.equal(true);
   });
 });

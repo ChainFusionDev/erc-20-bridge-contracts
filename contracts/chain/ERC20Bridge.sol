@@ -70,11 +70,11 @@ contract ERC20Bridge is Initializable, SignerOwnable {
 
     function deposit(
         address _token,
-        uint256 _chainId,
+        uint256 _sourceChainId,
         address _receiver,
         uint256 _amount
     ) external {
-        require(_chainId != block.chainid, "ERC20Bridge: cannot deposit on the same chain ID");
+        require(_sourceChainId != block.chainid, "ERC20Bridge: cannot deposit on the same chain ID");
         require(_amount != 0, "ERC20Bridge: amount cannot be equal to 0.");
         require(tokenManager.getType(_token) != TokenType.DISABLED, "TokenManager: token is not enabled");
 
@@ -83,7 +83,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
 
         uint256 transferAmount = _amount - fee;
 
-        bytes32 id = keccak256(abi.encodePacked(msg.sender, _token, _chainId, _receiver, transferAmount, fee));
+        bytes32 id = this.getDataId(msg.sender, _token, _sourceChainId, _receiver, transferAmount, fee);
         sent[id] = true;
 
         if (tokenManager.getType(_token) == TokenType.MINTED) {
@@ -95,33 +95,39 @@ contract ERC20Bridge is Initializable, SignerOwnable {
             );
         }
 
-        emit Deposited(msg.sender, _token, _chainId, _receiver, fee, transferAmount);
+        emit Deposited(msg.sender, _token, _sourceChainId, _receiver, fee, transferAmount);
 
-        bytes memory data = abi.encode(msg.sender, _token, _chainId, _receiver, transferAmount, fee);
+        bytes memory data = abi.encode(msg.sender, _token, _sourceChainId, _receiver, transferAmount, fee);
 
         // solhint-disable-next-line check-send-result
-        relayBridge.send(_chainId, block.gaslimit, data);
+        relayBridge.send(_sourceChainId, block.gaslimit, data);
     }
 
     function execute(uint256, bytes memory data) external onlyRelayBridge {
         (
             address _sender,
             address _token,
-            uint256 _chainId,
+            uint256 _sourceChainId,
             address _receiver,
             uint256 transferAmount,
             uint256 _fee
         ) = abi.decode(data, (address, address, uint256, address, uint256, uint256));
 
-        _executeTransfer(_sender, data, _token, _chainId, _receiver, transferAmount, _fee);
+        _executeTransfer(_sender, _token, _sourceChainId, _receiver, transferAmount, _fee);
     }
 
     function revertSend(uint256, bytes memory data) external onlyRelayBridge {
-        (address _sender, address _token, uint256 _chainId, address _receiver, uint256 _amount, uint256 _fee) = abi
-            .decode(data, (address, address, uint256, address, uint256, uint256));
+        (
+            address _sender,
+            address _token,
+            uint256 _sourceChainId,
+            address _receiver,
+            uint256 _amount,
+            uint256 _fee
+        ) = abi.decode(data, (address, address, uint256, address, uint256, uint256));
 
         require(tokenManager.getType(_token) != TokenType.DISABLED, "TokenManager: token is not enabled");
-        bytes32 id = keccak256(abi.encodePacked(_sender, data, _token, _receiver, _amount, _fee));
+        bytes32 id = this.getDataId(_sender, _token, _sourceChainId, _receiver, _amount, _fee);
 
         require(sent[id], "ERC20Bridge: can't revert, should be deposited");
         require(!reverted[id], "ERC20Bridge: already reverted");
@@ -135,7 +141,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
             liquidityPools.transfer(_token, _sender, _amount);
         }
 
-        emit Reverted(_sender, _token, _chainId, _receiver, _amount);
+        emit Reverted(_sender, _token, _sourceChainId, _receiver, _amount);
     }
 
     function setRelayBridge(address _relayBridge) public onlySigner {
@@ -154,7 +160,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         _setFeeManager(_feeManager);
     }
 
-    function depositNative(uint256 _chainId, address _receiver) public payable {
+    function depositNative(uint256 _sourceChainId, address _receiver) public payable {
         uint256 _amount = msg.value;
         require(_amount != 0, "ERC20Bridge: amount cannot be equal to 0.");
         require(tokenManager.getType(NATIVE_TOKEN) == TokenType.PROVIDED, "TokenManager: token is not enabled");
@@ -171,36 +177,50 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         (success, ) = address(liquidityPools).call{value: transferAmount, gas: 21000}("");
         require(success, "ERC20Bridge: transfer native token failed");
 
-        emit DepositedNative(msg.sender, NATIVE_TOKEN, _chainId, _receiver, fee, transferAmount);
+        bytes32 id = this.getDataId(msg.sender, NATIVE_TOKEN, _sourceChainId, _receiver, transferAmount, fee);
+        sent[id] = true;
 
-        bytes memory data = abi.encode(msg.sender, NATIVE_TOKEN, _chainId, _receiver, transferAmount, fee);
+        emit DepositedNative(msg.sender, NATIVE_TOKEN, _sourceChainId, _receiver, fee, transferAmount);
+
+        bytes memory data = abi.encode(msg.sender, NATIVE_TOKEN, _sourceChainId, _receiver, transferAmount, fee);
 
         // solhint-disable-next-line check-send-result
-        relayBridge.send(_chainId, block.gaslimit, data);
+        relayBridge.send(_sourceChainId, block.gaslimit, data);
     }
 
     function isExecuted(
         address _sender,
-        bytes calldata _data,
         address _token,
+        uint256 _sourceChainId,
         address _receiver,
         uint256 _amount,
         uint256 _fee
     ) public view returns (bool) {
-        bytes32 id = keccak256(abi.encodePacked(_sender, _data, _token, _receiver, _amount, _fee));
+        bytes32 id = this.getDataId(_sender, _token, _sourceChainId, _receiver, _amount, _fee);
         return executed[id];
     }
 
     function isReverted(
         address _sender,
-        bytes calldata _data,
         address _token,
+        uint256 _sourceChainId,
         address _receiver,
         uint256 _amount,
         uint256 _fee
     ) public view returns (bool) {
-        bytes32 id = keccak256(abi.encodePacked(_sender, _data, _token, _receiver, _amount, _fee));
+        bytes32 id = this.getDataId(_sender, _token, _sourceChainId, _receiver, _amount, _fee);
         return reverted[id];
+    }
+
+    function getDataId(
+        address _sender,
+        address _token,
+        uint256 _sourceChainId,
+        address _receiver,
+        uint256 _amount,
+        uint256 _fee
+    ) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(_sender, _token, _sourceChainId, _receiver, _amount, _fee));
     }
 
     function _setRelayBridge(address _relayBridge) private {
@@ -225,7 +245,6 @@ contract ERC20Bridge is Initializable, SignerOwnable {
 
     function _executeTransfer(
         address _sender,
-        bytes memory _data,
         address _token,
         uint256 _sourceChainId,
         address _receiver,
@@ -233,7 +252,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         uint256 _fee
     ) private {
         require(tokenManager.getType(_token) != TokenType.DISABLED, "TokenManager: token is not enabled");
-        bytes32 id = keccak256(abi.encodePacked(_sender, _data, _token, _receiver, _amount, _fee));
+        bytes32 id = this.getDataId(_sender, _token, _sourceChainId, _receiver, _amount, _fee);
 
         require(!executed[id], "ERC20Bridge: already executed");
         executed[id] = true;
