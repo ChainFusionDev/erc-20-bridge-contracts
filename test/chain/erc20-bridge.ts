@@ -76,6 +76,9 @@ describe('ERC20Bridge', function () {
     const NATIVE_TOKEN = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
     const sourceChainId = network.config.chainId;
     const gasLimit = (await ethers.provider.getBlock(0)).gasLimit;
+    const nonce = 0;
+    const mintNonce = 1;
+    const nativeNonce = 2;
 
     const {
       mockChainId,
@@ -95,17 +98,25 @@ describe('ERC20Bridge', function () {
     const abiCoder = ethers.utils.defaultAbiCoder;
     const data = abiCoder.encode(
       ['uint256', 'address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
-      [0, sender.address, mockToken.address, mockChainId, receiver.address, transferAmount, fee]
+      [nonce, sender.address, mockToken.address, mockChainId, receiver.address, transferAmount, fee]
     );
 
     const dataMintableToken = abiCoder.encode(
       ['uint256', 'address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
-      [1, sender.address, mockMintableBurnableToken.address, mockChainId, receiver.address, transferAmount, mintFee]
+      [
+        mintNonce,
+        sender.address,
+        mockMintableBurnableToken.address,
+        mockChainId,
+        receiver.address,
+        transferAmount,
+        mintFee,
+      ]
     );
 
     const dataNativeToken = abiCoder.encode(
       ['uint256', 'address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
-      [2, sender.address, NATIVE_TOKEN, mockChainId, receiver.address, transferAmount, nativeFee]
+      [nativeNonce, sender.address, NATIVE_TOKEN, mockChainId, receiver.address, transferAmount, nativeFee]
     );
 
     const hashToken = await mockRelayBridge.dataHash(
@@ -114,7 +125,7 @@ describe('ERC20Bridge', function () {
       mockChainId,
       gasLimit,
       data,
-      0
+      nonce
     );
 
     const hashMintToken = await mockRelayBridge.dataHash(
@@ -123,7 +134,7 @@ describe('ERC20Bridge', function () {
       mockChainId,
       gasLimit,
       dataMintableToken,
-      1
+      mintNonce
     );
 
     const hashNativeToken = await mockRelayBridge.dataHash(
@@ -132,7 +143,7 @@ describe('ERC20Bridge', function () {
       mockChainId,
       gasLimit,
       dataNativeToken,
-      2
+      nativeNonce
     );
 
     const mockSenderBalanceBeforeDeposit = await mockToken.balanceOf(sender.address);
@@ -165,7 +176,15 @@ describe('ERC20Bridge', function () {
     await erc20Bridge.setRelayBridge(sender.address);
     await expect(erc20Bridge.revertSend(mockChainId, dataMintableToken))
       .emit(erc20Bridge, 'Reverted')
-      .withArgs(sender.address, mockMintableBurnableToken.address, mockChainId, receiver.address, transferAmount);
+      .withArgs(
+        mintNonce,
+        sender.address,
+        mockMintableBurnableToken.address,
+        mockChainId,
+        receiver.address,
+        transferAmount,
+        mintFee
+      );
     await erc20Bridge.setRelayBridge(mockRelayBridge.address);
 
     expect(await mockRelayBridge.sent(hashMintToken)).to.equals(true);
@@ -295,7 +314,7 @@ describe('ERC20Bridge', function () {
 
     await expect(erc20Bridge.connect(signer).revertSend(mockChainId, dataNativeToken))
       .emit(erc20Bridge, 'Reverted')
-      .withArgs(sender.address, NATIVE_TOKEN, mockChainId, receiver.address, transferAmount);
+      .withArgs(nonce, sender.address, NATIVE_TOKEN, mockChainId, receiver.address, transferAmount, fee);
   });
 
   it('should execute', async function () {
@@ -390,7 +409,7 @@ describe('ERC20Bridge', function () {
 
     await expect(erc20Bridge.connect(signer).execute(mockChainId, data))
       .to.emit(erc20Bridge, 'Transferred')
-      .withArgs(sender.address, mockToken.address, mockChainId, receiver.address, transferAmount);
+      .withArgs(nonce, sender.address, mockToken.address, mockChainId, receiver.address, transferAmount, fee);
 
     expect(await erc20Bridge.isExecuted(nonce, mockChainId, Number(sourceChain))).to.equal(true);
   });
