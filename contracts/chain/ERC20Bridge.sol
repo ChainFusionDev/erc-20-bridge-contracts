@@ -10,7 +10,6 @@ import "./FeeManager.sol";
 import "./Globals.sol";
 import "../interfaces/IERC20MintableBurnable.sol";
 import "../interfaces/IRelayBridge.sol";
-import "hardhat/console.sol";
 
 contract ERC20Bridge is Initializable, SignerOwnable {
     mapping(bytes32 => bool) public sent;
