@@ -24,29 +24,48 @@ contract ERC20Bridge is Initializable, SignerOwnable {
     FeeManager public feeManager;
     IRelayBridge public relayBridge;
 
-    event Deposited(
-        address sender,
-        address token,
-        uint256 destinationChainId,
-        address receiver,
-        uint256 fee,
-        uint256 transferAmount
-    );
-    event DepositedNative(
-        address sender,
-        address token,
-        uint256 destinationChainId,
-        address receiver,
-        uint256 fee,
-        uint256 transferAmount
-    );
-    event Transferred(address sender, address token, uint256 sourceChainId, address receiver, uint256 amount);
     event RelayBridgeUpdated(address _relayBridge);
     event TokenManagerUpdated(address _tokenManager);
     event ValidatorAddressUpdated(address _validatorAddress);
     event LiquidityPoolsUpdated(address _liquidityPools);
     event FeeManagerUpdated(address _feeManager);
-    event Reverted(address sender, address token, uint256 destinationChainId, address receiver, uint256 amount);
+    event Deposited(
+        uint256 nonce,
+        address sender,
+        address token,
+        uint256 destinationChainId,
+        address receiver,
+        uint256 amount,
+        uint256 fee
+    );
+    event DepositedNative(
+        uint256 nonce,
+        address sender,
+        address token,
+        uint256 destinationChainId,
+        address receiver,
+        uint256 amount,
+        uint256 fee
+    );
+    event Transferred(
+        uint256 nonce,
+        address sender,
+        address token,
+        uint256 sourceChainId,
+        address receiver,
+        uint256 amount,
+        uint256 fee
+    );
+
+    event Reverted(
+        uint256 nonce,
+        address sender,
+        address token,
+        uint256 destinationChainId,
+        address receiver,
+        uint256 amount,
+        uint256 fee
+    );
 
     modifier onlyRelayBridge() {
         require(msg.sender == address(relayBridge), "ERC20Bridge: only RelayBridge");
@@ -96,7 +115,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
             );
         }
 
-        emit Deposited(msg.sender, _token, _destinationChainId, _receiver, fee, transferAmount);
+        emit Deposited(nonce, msg.sender, _token, _destinationChainId, _receiver, _amount, fee);
 
         bytes memory data = abi.encode(nonce, msg.sender, _token, _destinationChainId, _receiver, transferAmount, fee);
 
@@ -128,7 +147,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
             uint256 _destinationChainId,
             address _receiver,
             uint256 _amount,
-
+            uint256 _fee
         ) = abi.decode(data, (uint256, address, address, uint256, address, uint256, uint256));
 
         require(tokenManager.getType(_token) != TokenType.DISABLED, "TokenManager: token is not enabled");
@@ -146,7 +165,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
             liquidityPools.transfer(_token, _sender, _amount);
         }
 
-        emit Reverted(_sender, _token, _destinationChainId, _receiver, _amount);
+        emit Reverted(_nonce, _sender, _token, _destinationChainId, _receiver, _amount, _fee);
     }
 
     function setRelayBridge(address _relayBridge) public onlySigner {
@@ -185,7 +204,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         bytes32 id = this.getDataId(nonce, block.chainid, _destinationChainId);
         sent[id] = true;
 
-        emit DepositedNative(msg.sender, NATIVE_TOKEN, _destinationChainId, _receiver, fee, transferAmount);
+        emit DepositedNative(nonce, msg.sender, NATIVE_TOKEN, _destinationChainId, _receiver, _amount, fee);
 
         bytes memory data = abi.encode(
             nonce,
@@ -256,7 +275,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         uint256 _sourceChainId,
         address _receiver,
         uint256 _amount,
-        uint256
+        uint256 _fee
     ) private {
         require(tokenManager.getType(_token) != TokenType.DISABLED, "TokenManager: token is not enabled");
         bytes32 id = this.getDataId(_nonce, _sourceChainId, block.chainid);
@@ -272,6 +291,6 @@ contract ERC20Bridge is Initializable, SignerOwnable {
             liquidityPools.transfer(_token, _receiver, _amount);
         }
 
-        emit Transferred(_sender, _token, _sourceChainId, _receiver, _amount);
+        emit Transferred(_nonce, _sender, _token, _sourceChainId, _receiver, _amount, _fee);
     }
 }
