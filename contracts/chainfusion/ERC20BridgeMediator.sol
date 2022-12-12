@@ -11,35 +11,26 @@ contract ERC20BridgeMediator is Ownable {
     event RemovedToken(string symbol, uint256 chainId, address token);
 
     function mediate(
-        uint256 sourceChain,
-        uint256 destinationChain,
-        bytes memory sourceData
+        uint256 _sourceChain,
+        uint256 _destinationChain,
+        bytes memory _sourceData
     ) external view returns (bytes memory) {
         (
-            uint256 _nonce,
-            address _sender,
-            address _sourceToken,
-            uint256 _chainId,
-            address _receiver,
-            uint256 _transferAmount,
-            uint256 _fee
-        ) = abi.decode(sourceData, (uint256, address, address, uint256, address, uint256, uint256));
+            uint256 nonce,
+            address sender,
+            address sourceToken,
+            address receiver,
+            uint256 transferAmount,
+            uint256 fee
+        ) = abi.decode(_sourceData, (uint256, address, address, address, uint256, uint256));
 
-        string memory symbol = tokenToSymbol[sourceChain][_sourceToken];
+        string memory symbol = tokenToSymbol[_sourceChain][sourceToken];
         require(bytes(symbol).length > 0, "ERC20BridgeMediator: can't find token symbol");
 
-        address destinationToken = symbolToToken[destinationChain][symbol];
+        address destinationToken = symbolToToken[_destinationChain][symbol];
         require(destinationToken != address(0), "ERC20BridgeMediator: can't find token by chain and symbol");
 
-        bytes memory destinationData = abi.encode(
-            _nonce,
-            _sender,
-            destinationToken,
-            _chainId,
-            _receiver,
-            _transferAmount,
-            _fee
-        );
+        bytes memory destinationData = abi.encode(nonce, sender, destinationToken, receiver, transferAmount, fee);
 
         return destinationData;
     }

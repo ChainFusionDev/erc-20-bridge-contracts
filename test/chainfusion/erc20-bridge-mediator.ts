@@ -69,14 +69,14 @@ describe('ERC20BridgeMediator', function () {
     const nonce = 0;
 
     const { erc20BridgeMediator } = await deploySystemWithMocks();
-    const { mockChainId, mockToken, feeManager } = await deployBridgeWithMocks();
+    const { mockToken, feeManager } = await deployBridgeWithMocks();
 
     const fee = await feeManager.calculateFee(mockToken.address, transferAmount);
 
     const abiCoder = ethers.utils.defaultAbiCoder;
     const data = abiCoder.encode(
-      ['uint256', 'address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
-      [nonce, sender.address, mockToken.address, mockChainId, receiver.address, transferAmount, fee]
+      ['uint256', 'address', 'address', 'address', 'uint256', 'uint256'],
+      [nonce, sender.address, mockToken.address, receiver.address, transferAmount, fee]
     );
 
     await expect(erc20BridgeMediator.mediate(sourceChain, destinationChain, data)).to.be.revertedWith(

@@ -10,6 +10,7 @@ import "./FeeManager.sol";
 import "./Globals.sol";
 import "../interfaces/IERC20MintableBurnable.sol";
 import "../interfaces/IRelayBridge.sol";
+import "hardhat/console.sol";
 
 contract ERC20Bridge is Initializable, SignerOwnable {
     mapping(bytes32 => bool) public sent;
@@ -115,57 +116,46 @@ contract ERC20Bridge is Initializable, SignerOwnable {
             );
         }
 
-        emit Deposited(nonce, msg.sender, _token, _destinationChainId, _receiver, _amount, fee);
-
-        bytes memory data = abi.encode(nonce, msg.sender, _token, _destinationChainId, _receiver, transferAmount, fee);
+        bytes memory data = abi.encode(nonce, msg.sender, _token, _receiver, transferAmount, fee);
 
         // solhint-disable-next-line check-send-result
         relayBridge.send(_destinationChainId, block.gaslimit, data);
 
         nonce++;
+
+        emit Deposited(nonce - 1, msg.sender, _token, _destinationChainId, _receiver, _amount, fee);
     }
 
-    function execute(uint256, bytes memory data) external onlyRelayBridge {
-        (
-            uint256 _nonce,
-            address _sender,
-            address _token,
-            uint256 _sourceChainId,
-            address _receiver,
-            uint256 transferAmount,
-            uint256 _fee
-        ) = abi.decode(data, (uint256, address, address, uint256, address, uint256, uint256));
+    function execute(uint256 _sourceChainId, bytes memory _data) external onlyRelayBridge {
+        (uint256 _nonce, address sender, address token, address receiver, uint256 transferAmount, uint256 fee) = abi
+            .decode(_data, (uint256, address, address, address, uint256, uint256));
 
-        _executeTransfer(_nonce, _sender, _token, _sourceChainId, _receiver, transferAmount, _fee);
+        _executeTransfer(_nonce, sender, token, _sourceChainId, receiver, transferAmount, fee);
     }
 
-    function revertSend(uint256, bytes memory data) external onlyRelayBridge {
-        (
-            uint256 _nonce,
-            address _sender,
-            address _token,
-            uint256 _destinationChainId,
-            address _receiver,
-            uint256 _amount,
-            uint256 _fee
-        ) = abi.decode(data, (uint256, address, address, uint256, address, uint256, uint256));
+    function revertSend(uint256 _destinationChainId, bytes memory _data) external onlyRelayBridge {
+        (uint256 _nonce, address sender, address token, address receiver, uint256 amount, uint256 fee) = abi.decode(
+            _data,
+            (uint256, address, address, address, uint256, uint256)
+        );
 
-        require(tokenManager.getType(_token) != TokenType.DISABLED, "TokenManager: token is not enabled");
+        require(tokenManager.getType(token) != TokenType.DISABLED, "TokenManager: token is not enabled");
+
         bytes32 id = this.getDataId(_nonce, block.chainid, _destinationChainId);
 
         require(sent[id], "ERC20Bridge: can't revert, should be deposited");
         require(!reverted[id], "ERC20Bridge: already reverted");
         reverted[id] = true;
 
-        if (tokenManager.getType(_token) == TokenType.MINTED) {
-            IERC20MintableBurnable(_token).mint(_sender, _amount);
-        } else if (_token == NATIVE_TOKEN) {
-            liquidityPools.transferNative(_sender, _amount);
+        if (tokenManager.getType(token) == TokenType.MINTED) {
+            IERC20MintableBurnable(token).mint(sender, amount);
+        } else if (token == NATIVE_TOKEN) {
+            liquidityPools.transferNative(sender, amount);
         } else {
-            liquidityPools.transfer(_token, _sender, _amount);
+            liquidityPools.transfer(token, sender, amount);
         }
 
-        emit Reverted(_nonce, _sender, _token, _destinationChainId, _receiver, _amount, _fee);
+        emit Reverted(_nonce, sender, token, _destinationChainId, receiver, amount, fee);
     }
 
     function setRelayBridge(address _relayBridge) public onlySigner {
@@ -204,22 +194,14 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         bytes32 id = this.getDataId(nonce, block.chainid, _destinationChainId);
         sent[id] = true;
 
-        emit DepositedNative(nonce, msg.sender, NATIVE_TOKEN, _destinationChainId, _receiver, _amount, fee);
-
-        bytes memory data = abi.encode(
-            nonce,
-            msg.sender,
-            NATIVE_TOKEN,
-            _destinationChainId,
-            _receiver,
-            transferAmount,
-            fee
-        );
+        bytes memory data = abi.encode(nonce, msg.sender, NATIVE_TOKEN, _receiver, transferAmount, fee);
 
         // solhint-disable-next-line check-send-result
         relayBridge.send(_destinationChainId, block.gaslimit, data);
 
         nonce++;
+
+        emit DepositedNative(nonce - 1, msg.sender, NATIVE_TOKEN, _destinationChainId, _receiver, _amount, fee);
     }
 
     function isExecuted(

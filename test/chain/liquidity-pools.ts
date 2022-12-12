@@ -181,13 +181,13 @@ describe('LiquidityPools', function () {
 
     const abiCoder = ethers.utils.defaultAbiCoder;
     const data = abiCoder.encode(
-      ['uint256', 'address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
-      [nonce, sender.address, mockToken.address, mockChainId, receiver.address, transferAmount, fee]
+      ['uint256', 'address', 'address', 'address', 'uint256', 'uint256'],
+      [nonce, sender.address, mockToken.address, receiver.address, transferAmount, fee]
     );
 
     const dataNullAddress = abiCoder.encode(
-      ['uint256', 'address', 'address', 'uint256', 'address', 'uint256', 'uint256'],
-      [nonce, sender.address, mockToken.address, mockChainId, nullAddress, transferAmount, fee]
+      ['uint256', 'address', 'address', 'address', 'uint256', 'uint256'],
+      [nonce, sender.address, mockToken.address, nullAddress, transferAmount, fee]
     );
 
     await hre.network.provider.request({
