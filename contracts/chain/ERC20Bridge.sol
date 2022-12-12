@@ -120,9 +120,9 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         // solhint-disable-next-line check-send-result
         relayBridge.send(_destinationChainId, block.gaslimit, data);
 
-        nonce++;
+        emit Deposited(nonce, msg.sender, _token, _destinationChainId, _receiver, _amount, fee);
 
-        emit Deposited(nonce - 1, msg.sender, _token, _destinationChainId, _receiver, _amount, fee);
+        nonce++;
     }
 
     function execute(uint256 _sourceChainId, bytes memory _data) external onlyRelayBridge {
@@ -198,9 +198,9 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         // solhint-disable-next-line check-send-result
         relayBridge.send(_destinationChainId, block.gaslimit, data);
 
-        nonce++;
+        emit DepositedNative(nonce, msg.sender, NATIVE_TOKEN, _destinationChainId, _receiver, _amount, fee);
 
-        emit DepositedNative(nonce - 1, msg.sender, NATIVE_TOKEN, _destinationChainId, _receiver, _amount, fee);
+        nonce++;
     }
 
     function isExecuted(
