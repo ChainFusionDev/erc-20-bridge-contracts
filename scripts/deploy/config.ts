@@ -47,6 +47,17 @@ export async function readChainContractsConfig(chainId: number): Promise<Contrac
   }
 }
 
+export async function readChainContractsConfigByPath(path: string): Promise<ContractsConfig> {
+  try {
+    const fileData = await fs.readFile(path);
+    const config = JSON.parse(fileData.toString());
+
+    return config;
+  } catch (error) {
+    return {};
+  }
+}
+
 export async function writeChainContractsConfig(chainId: number, config: ContractsConfig): Promise<void> {
   try {
     await fs.writeFile(`contracts-${chainId}.json`, JSON.stringify(config, null, 2));
