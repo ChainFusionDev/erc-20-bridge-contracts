@@ -62,22 +62,31 @@ export async function createDAppConfig(
   return { nativeChain, nativeContracts, chains, tokens };
 }
 
+const nativeChainName = 'ChainFusion';
+
 export async function createNativeChainConfig(): Promise<NativeChainConfig> {
-  const networkConfig = config.networks[network.name] as HttpNetworkConfig;
+  return new Promise((resolve, reject) => {
+    for (const chain of config.etherscan.customChains) {
+      if (chain.network != network.name) {
+        continue;
+      }
 
-  const chainId = networkConfig.chainId ?? 1;
-  const url = networkConfig.url;
+      const networkConfig = config.networks[network.name] as HttpNetworkConfig;
 
-  var nativeChain: NativeChainConfig = {
-    chainId: chainId,
-    identifier: network.name.toLowerCase(),
-    name: network.name,
-    rpc: url,
-    explorer: 'test',
-    nativeCurrency: { name: 'test', symbol: 'test', decimals: 1 },
-  };
+      var nativeChain: NativeChainConfig = {
+        chainId: chain.chainId,
+        identifier: nativeChainName.toLowerCase(),
+        name: nativeChainName,
+        rpc: networkConfig.url,
+        explorer: chain.urls.browserURL,
+        nativeCurrency: getNativeCurrency(),
+      };
 
-  return nativeChain;
+      resolve(nativeChain);
+    }
+
+    reject('Error: Failed to generate config, should to specify network deployment');
+  });
 }
 
 export async function createNativeContractsConfig(contractsConfig: ContractsConfig): Promise<NativeContractsConfig> {
@@ -101,15 +110,25 @@ export async function createChainConfig(contractChainConfig: ContractsConfig): P
         return;
       }
 
+      var explorer = '';
+
+      for (const chain of config.etherscan.customChains) {
+        if (chain.network != contractChainConfig.networkName) {
+          continue;
+        }
+
+        explorer = chain.urls.browserURL;
+      }
+
       const chainId = networkConfig.chainId ?? 1;
 
       var chain: ChainConfig = {
         chainId: chainId,
-        identifier: `chainfusion-${contractChainConfig.networkName}`.toLowerCase(),
+        identifier: `${nativeChainName}-${contractChainConfig.networkName}`.toLowerCase(),
         name: contractChainConfig.networkName,
         rpc: networkConfig.url,
-        explorer: 'test',
-        nativeCurrency: { name: 'test', symbol: 'test', decimals: 18 },
+        explorer: explorer,
+        nativeCurrency: getNativeCurrency(),
         erc20BridgeAddress: contractChainConfig.erc20Bridge,
       };
 
@@ -164,7 +183,7 @@ async function updateTokenConfigs(
 
     for (const config of tokenConfigs) {
       if (config.identifier == tokenConfig.identifier) {
-        config.chains[`chainfusion-${contractChainConfig.networkName}`.toLowerCase()] = address;
+        config.chains[`${nativeChainName}-${contractChainConfig.networkName}`.toLowerCase()] = address;
       }
     }
 
@@ -174,36 +193,34 @@ async function updateTokenConfigs(
   }
 }
 
-function createTokenConfig(
+async function createTokenConfig(
   contractChainConfig: ContractsConfig,
   address: string,
   signer: Signer
 ): Promise<TokenConfig> {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const tokenFactory = await ethers.getContractFactory('Token', signer);
-      const tokenContract = tokenFactory.attach(address);
+  try {
+    const tokenFactory = await ethers.getContractFactory('Token', signer);
+    const tokenContract = tokenFactory.attach(address);
 
-      const symbol = await tokenContract.symbol();
-      const name = await tokenContract.name();
-      const decimals = await tokenContract.decimals();
+    const symbol = await tokenContract.symbol();
+    const name = await tokenContract.name();
+    const decimals = await tokenContract.decimals();
 
-      var chains: Chains = {};
-      chains[`chainfusion-${contractChainConfig.networkName}`.toLowerCase()] = address;
+    var chains: Chains = {};
+    chains[`${nativeChainName}-${contractChainConfig.networkName}`.toLowerCase()] = address;
 
-      var tokenConfig: TokenConfig = {
-        identifier: symbol.toLowerCase(),
-        name: name,
-        symbol: symbol,
-        decimals: decimals,
-        chains: chains,
-      };
+    var tokenConfig: TokenConfig = {
+      identifier: symbol.toLowerCase(),
+      name: name,
+      symbol: symbol,
+      decimals: decimals,
+      chains: chains,
+    };
 
-      resolve(tokenConfig);
-    } catch (error) {
-      reject();
-    }
-  });
+    return tokenConfig;
+  } catch (error) {
+    throw new Error('Failed to create token config');
+  }
 }
 
 export async function writeDAppConfig(dAppConfig: DAppConfig): Promise<void> {
@@ -212,6 +229,10 @@ export async function writeDAppConfig(dAppConfig: DAppConfig): Promise<void> {
   } catch (error) {
     console.error(error);
   }
+}
+
+function getNativeCurrency(): NativeCurrency {
+  return { name: nativeChainName, symbol: 'CFN', decimals: 18 };
 }
 
 function contains(tokenConfigs: TokenConfig[], tokenConfig: TokenConfig): boolean {
