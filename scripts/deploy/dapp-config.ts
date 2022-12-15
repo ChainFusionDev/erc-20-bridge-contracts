@@ -121,11 +121,12 @@ export async function createChainConfig(contractChainConfig: ContractsConfig): P
       }
 
       const chainId = networkConfig.chainId ?? 1;
+      const name = contractChainConfig.networkName.charAt(0).toUpperCase() + contractChainConfig.networkName.slice(1);
 
       var chain: ChainConfig = {
         chainId: chainId,
         identifier: `${nativeChainName}-${contractChainConfig.networkName}`.toLowerCase(),
-        name: contractChainConfig.networkName,
+        name: name,
         rpc: networkConfig.url,
         explorer: explorer,
         nativeCurrency: getNativeCurrency(),
