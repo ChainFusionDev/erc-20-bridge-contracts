@@ -186,11 +186,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
 
         uint256 transferAmount = _amount - fee;
 
-        // solhint-disable-next-line avoid-low-level-calls
-        (success, ) = address(liquidityPools).call{value: transferAmount, gas: 21000}("");
-        require(success, "ERC20Bridge: transfer native token failed");
-
-        liquidityPools.depositNative(NATIVE_TOKEN, transferAmount);
+        liquidityPools.depositNative{value: transferAmount}();
 
         bytes32 id = this.getDataId(nonce, block.chainid, _destinationChainId);
         sent[id] = true;
