@@ -73,13 +73,27 @@ contract LiquidityPools is Initializable, Ownable, SignerOwnable {
             IERC20(_token).balanceOf(address(this)) >= _transferAmount,
             "IERC20: amount more than contract balance"
         );
+
         require(ERC20(_token).transfer(_receiver, _transferAmount), "ERC20: transfer failed");
+
+        availableLiquidity[_token] -= _transferAmount;
     }
 
     function transferNative(address _receiver, uint256 _amount) external onlyERC20Bridge {
         // solhint-disable-next-line avoid-low-level-calls
         (bool success, ) = _receiver.call{value: _amount, gas: 21000}("");
         require(success, "LiquidityPools: transfer native token failed");
+
+        availableLiquidity[NATIVE_TOKEN] -= _amount;
+    }
+
+    function deposit(address _token, uint256 _amount) external onlyERC20Bridge {
+        require(IERC20(_token).transferFrom(msg.sender, address(this), _amount), "IERC20: transfer failed");
+        availableLiquidity[_token] += _amount;
+    }
+
+    function depositNative() external payable onlyERC20Bridge {
+        availableLiquidity[NATIVE_TOKEN] += msg.value;
     }
 
     function distributeFee(address _token, uint256 _amount) external onlyFeeManager {

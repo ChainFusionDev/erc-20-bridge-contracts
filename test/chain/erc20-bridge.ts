@@ -46,7 +46,7 @@ describe('ERC20Bridge', function () {
     ).to.be.revertedWith('ERC20Bridge: cannot deposit on the same chain ID');
     await expect(
       erc20Bridge.deposit(mockToken.address, mockChainId, receiver.address, depositAmountZero)
-    ).to.be.revertedWith('Bridge: amount cannot be equal to 0.');
+    ).to.be.revertedWith('Bridge: amount cannot be equal to 0');
     await erc20Bridge.deposit(mockToken.address, mockChainId, receiver.address, depositAmount);
 
     const fee = await feeManager.calculateFee(mockToken.address, transferAmount);
@@ -143,7 +143,19 @@ describe('ERC20Bridge', function () {
 
     await mockToken.approve(erc20Bridge.address, depositAmount);
     await mockToken.approve(liquidityPools.address, depositAmount);
+
+    var availableLiquidityBeforeDepositERC20Token = await liquidityPools.availableLiquidity(mockToken.address);
+
     await erc20Bridge.deposit(mockToken.address, mockChainId, receiver.address, depositAmount);
+
+    var availableLiquidityAfterDepositERC20Token = await liquidityPools.availableLiquidity(mockToken.address);
+
+    expect(availableLiquidityAfterDepositERC20Token).to.equal(
+      availableLiquidityBeforeDepositERC20Token.add(transferAmount)
+    );
+    expect(await mockToken.balanceOf(liquidityPools.address)).to.equal(
+      availableLiquidityBeforeDepositERC20Token.add(transferAmount)
+    );
 
     const mockLiquidityBalanceAfterDeposit = await mockToken.balanceOf(liquidityPools.address);
     expect(mockLiquidityBalanceAfterDeposit.sub(mockLiquidityBalanceBeforeDeposit)).to.equal(transferAmount);
@@ -194,11 +206,23 @@ describe('ERC20Bridge', function () {
     const nativeSenderBalanceBeforeDeposit = await ethers.provider.getBalance(sender.address);
     const nativeLiquidityBalanceBeforeDeposit = await ethers.provider.getBalance(liquidityPools.address);
 
+    var availableLiquidityBeforeDepositNativeToken = await liquidityPools.availableLiquidity(NATIVE_TOKEN);
+
     const nativeDepositTx = await (
       await erc20Bridge.depositNative(mockChainId, receiver.address, {
         value: depositAmount,
       })
     ).wait();
+
+    var availableLiquidityAfterDepositNativeToken = await liquidityPools.availableLiquidity(NATIVE_TOKEN);
+
+    expect(availableLiquidityAfterDepositNativeToken).to.equal(
+      availableLiquidityBeforeDepositNativeToken.add(transferAmount)
+    );
+    expect(await ethers.provider.getBalance(liquidityPools.address)).to.equal(
+      availableLiquidityBeforeDepositNativeToken.add(transferAmount)
+    );
+
     const depositTxFee = nativeDepositTx.gasUsed.mul(nativeDepositTx.effectiveGasPrice);
 
     const nativeSenderBalanceAfterDeposit = await ethers.provider.getBalance(sender.address);
@@ -213,7 +237,17 @@ describe('ERC20Bridge', function () {
     const nativeSetRelayTx = await (await erc20Bridge.setRelayBridge(sender.address)).wait();
     const setRelayTxFee = nativeSetRelayTx.gasUsed.mul(nativeSetRelayTx.effectiveGasPrice);
 
+    var availableLiquidityBeforeRevertNativeToken = await liquidityPools.availableLiquidity(NATIVE_TOKEN);
     const nativeRevertTx = await (await erc20Bridge.revertSend(mockChainId, dataNativeToken)).wait();
+    var availableLiquidityAfterRevertNativeToken = await liquidityPools.availableLiquidity(NATIVE_TOKEN);
+
+    expect(availableLiquidityAfterRevertNativeToken).to.equal(
+      availableLiquidityBeforeRevertNativeToken.sub(transferAmount)
+    );
+    expect(await ethers.provider.getBalance(liquidityPools.address)).to.equal(
+      availableLiquidityBeforeRevertNativeToken.sub(transferAmount)
+    );
+
     const revertTxFee = nativeRevertTx.gasUsed.mul(nativeRevertTx.effectiveGasPrice);
 
     expect(await mockRelayBridge.sent(hashNativeToken)).to.equals(true);
@@ -350,7 +384,14 @@ describe('ERC20Bridge', function () {
       })
     ).wait();
 
+    var availableLiquidityBeforeExecute = await liquidityPools.availableLiquidity(mockToken.address);
     await erc20Bridge.connect(signer).execute(mockChainId, data);
+    var availableLiquidityAfterExecute = await liquidityPools.availableLiquidity(mockToken.address);
+
+    expect(availableLiquidityAfterExecute).to.equal(availableLiquidityBeforeExecute.sub(transferAmount));
+    expect(await mockToken.balanceOf(liquidityPools.address)).to.equal(
+      availableLiquidityBeforeExecute.sub(transferAmount)
+    );
 
     const receiverBalanceAfterExecute = await mockToken.balanceOf(receiver.address);
     expect(receiverBalanceAfterExecute.sub(receiverBalanceBeforeExecute)).to.equal(transferAmount);
@@ -499,7 +540,7 @@ describe('ERC20Bridge', function () {
       erc20Bridge.depositNative(mockChainId, receiver.address, {
         value: depositAmountZero,
       })
-    ).to.be.revertedWith('ERC20Bridge: amount cannot be equal to 0.');
+    ).to.be.revertedWith('ERC20Bridge: amount cannot be equal to 0');
     await erc20Bridge.depositNative(mockChainId, receiver.address, {
       value: depositAmount,
     });

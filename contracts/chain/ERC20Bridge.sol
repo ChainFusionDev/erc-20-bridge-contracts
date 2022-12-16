@@ -95,7 +95,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         uint256 _amount
     ) external {
         require(_destinationChainId != block.chainid, "ERC20Bridge: cannot deposit on the same chain ID");
-        require(_amount != 0, "ERC20Bridge: amount cannot be equal to 0.");
+        require(_amount != 0, "ERC20Bridge: amount cannot be equal to 0");
         require(tokenManager.getType(_token) != TokenType.DISABLED, "TokenManager: token is not enabled");
 
         uint256 fee = feeManager.calculateFee(_token, _amount);
@@ -109,10 +109,10 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         if (tokenManager.getType(_token) == TokenType.MINTED) {
             IERC20MintableBurnable(_token).burnFrom(msg.sender, transferAmount);
         } else {
-            require(
-                IERC20(_token).transferFrom(msg.sender, address(liquidityPools), transferAmount),
-                "IERC20: transfer failed"
-            );
+            require(IERC20(_token).transferFrom(msg.sender, address(this), transferAmount), "IERC20: transfer failed");
+
+            require(IERC20(_token).approve(address(liquidityPools), _amount), "IERC20: approve failed");
+            liquidityPools.deposit(_token, transferAmount);
         }
 
         bytes memory data = abi.encode(nonce, msg.sender, _token, _receiver, transferAmount, fee);
@@ -175,7 +175,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
 
     function depositNative(uint256 _destinationChainId, address _receiver) public payable {
         uint256 _amount = msg.value;
-        require(_amount != 0, "ERC20Bridge: amount cannot be equal to 0.");
+        require(_amount != 0, "ERC20Bridge: amount cannot be equal to 0");
         require(tokenManager.getType(NATIVE_TOKEN) == TokenType.PROVIDED, "TokenManager: token is not enabled");
 
         uint256 fee = feeManager.calculateFee(NATIVE_TOKEN, _amount);
@@ -186,9 +186,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
 
         uint256 transferAmount = _amount - fee;
 
-        // solhint-disable-next-line avoid-low-level-calls
-        (success, ) = address(liquidityPools).call{value: transferAmount, gas: 21000}("");
-        require(success, "ERC20Bridge: transfer native token failed");
+        liquidityPools.depositNative{value: transferAmount}();
 
         bytes32 id = this.getDataId(nonce, block.chainid, _destinationChainId);
         sent[id] = true;
