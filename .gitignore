@@ -13,5 +13,6 @@ artifacts
 
 .openzeppelin/.session
 
+/config.json
 /contracts.json
 /contracts-*.json
