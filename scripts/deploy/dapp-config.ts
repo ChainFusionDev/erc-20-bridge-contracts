@@ -125,7 +125,7 @@ export async function createChainConfig(contractChainConfig: ContractsConfig): P
 
       var chain: ChainConfig = {
         chainId: chainId,
-        identifier: `${nativeChainName}-${contractChainConfig.networkName}`.toLowerCase(),
+        identifier: `${contractChainConfig.networkName}`.toLowerCase(),
         name: name,
         rpc: networkConfig.url,
         explorer: explorer,
