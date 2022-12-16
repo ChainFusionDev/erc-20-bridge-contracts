@@ -7,7 +7,7 @@ async function main() {
 
   const contractsConfig = await readContractsConfig();
 
-  const nativeChain = await createNativeChainConfig();
+  const nativeChain = await createNativeChainConfig(contractsConfig);
   const nativeContracts = await createNativeContractsConfig(contractsConfig);
 
   var chains: Array<ChainConfig> = [];

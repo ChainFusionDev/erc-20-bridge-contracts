@@ -1,6 +1,6 @@
 import { Signer } from 'ethers';
 import { promises as fs } from 'fs';
-import { config, ethers, network } from 'hardhat';
+import { config, ethers } from 'hardhat';
 import { HttpNetworkConfig } from 'hardhat/types';
 import { ContractsConfig, readChainContractsConfigByPath } from './config';
 
@@ -64,28 +64,30 @@ export async function createDAppConfig(
 
 const nativeChainName = 'ChainFusion';
 
-export async function createNativeChainConfig(): Promise<NativeChainConfig> {
+export async function createNativeChainConfig(contractsConfig: ContractsConfig): Promise<NativeChainConfig> {
   return new Promise((resolve, reject) => {
-    for (const chain of config.etherscan.customChains) {
-      if (chain.network != network.name) {
-        continue;
+    if (contractsConfig.networkName === undefined) {
+      reject();
+    } else {
+      for (const chain of config.etherscan.customChains) {
+        if (chain.network != contractsConfig.networkName) {
+          continue;
+        }
+
+        const networkConfig = config.networks[contractsConfig.networkName] as HttpNetworkConfig;
+
+        var nativeChain: NativeChainConfig = {
+          chainId: chain.chainId,
+          identifier: nativeChainName.toLowerCase(),
+          name: nativeChainName,
+          rpc: networkConfig.url,
+          explorer: chain.urls.browserURL,
+          nativeCurrency: getNativeCurrency(),
+        };
+
+        resolve(nativeChain);
       }
-
-      const networkConfig = config.networks[network.name] as HttpNetworkConfig;
-
-      var nativeChain: NativeChainConfig = {
-        chainId: chain.chainId,
-        identifier: nativeChainName.toLowerCase(),
-        name: nativeChainName,
-        rpc: networkConfig.url,
-        explorer: chain.urls.browserURL,
-        nativeCurrency: getNativeCurrency(),
-      };
-
-      resolve(nativeChain);
     }
-
-    reject('Error: Failed to generate config, should to specify network deployment');
   });
 }
 
@@ -107,7 +109,7 @@ export async function createChainConfig(contractChainConfig: ContractsConfig): P
       const networkConfig = config.networks[contractChainConfig.networkName] as HttpNetworkConfig;
 
       if (networkConfig === undefined) {
-        return;
+        reject();
       }
 
       var explorer = '';
@@ -123,7 +125,7 @@ export async function createChainConfig(contractChainConfig: ContractsConfig): P
       const chainId = networkConfig.chainId ?? 1;
       const name = contractChainConfig.networkName.charAt(0).toUpperCase() + contractChainConfig.networkName.slice(1);
 
-      var chain: ChainConfig = {
+      resolve({
         chainId: chainId,
         identifier: `${contractChainConfig.networkName}`.toLowerCase(),
         name: name,
@@ -131,9 +133,7 @@ export async function createChainConfig(contractChainConfig: ContractsConfig): P
         explorer: explorer,
         nativeCurrency: getNativeCurrency(),
         erc20BridgeAddress: contractChainConfig.erc20Bridge,
-      };
-
-      resolve(chain);
+      });
     }
   });
 }
@@ -183,8 +183,8 @@ async function updateTokenConfigs(
     }
 
     for (const config of tokenConfigs) {
-      if (config.identifier == tokenConfig.identifier) {
-        config.chains[`${nativeChainName}-${contractChainConfig.networkName}`.toLowerCase()] = address;
+      if (config.identifier == tokenConfig.identifier && contractChainConfig.networkName !== undefined) {
+        config.chains[contractChainConfig.networkName.toLowerCase()] = address;
       }
     }
 
@@ -200,6 +200,12 @@ async function createTokenConfig(
   signer: Signer
 ): Promise<TokenConfig> {
   try {
+    var chains: Chains = {};
+
+    if (contractChainConfig.networkName === undefined) {
+      throw new Error('Failed to create token config');
+    }
+
     const tokenFactory = await ethers.getContractFactory('Token', signer);
     const tokenContract = tokenFactory.attach(address);
 
@@ -207,18 +213,15 @@ async function createTokenConfig(
     const name = await tokenContract.name();
     const decimals = await tokenContract.decimals();
 
-    var chains: Chains = {};
-    chains[`${nativeChainName}-${contractChainConfig.networkName}`.toLowerCase()] = address;
+    chains[contractChainConfig.networkName.toLowerCase()] = address;
 
-    var tokenConfig: TokenConfig = {
+    return {
       identifier: symbol.toLowerCase(),
       name: name,
       symbol: symbol,
       decimals: decimals,
       chains: chains,
     };
-
-    return tokenConfig;
   } catch (error) {
     throw new Error('Failed to create token config');
   }
