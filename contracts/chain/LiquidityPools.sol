@@ -10,6 +10,7 @@ import "./TokenManager.sol";
 import "./ERC20Bridge.sol";
 import "./FeeManager.sol";
 import "./Globals.sol";
+import "hardhat/console.sol";
 
 contract LiquidityPools is Initializable, Ownable, SignerOwnable {
     struct LiquidityPosition {
@@ -73,13 +74,31 @@ contract LiquidityPools is Initializable, Ownable, SignerOwnable {
             IERC20(_token).balanceOf(address(this)) >= _transferAmount,
             "IERC20: amount more than contract balance"
         );
+
+        availableLiquidity[_token] -= _transferAmount;
+
         require(ERC20(_token).transfer(_receiver, _transferAmount), "ERC20: transfer failed");
     }
 
     function transferNative(address _receiver, uint256 _amount) external onlyERC20Bridge {
+        availableLiquidity[NATIVE_TOKEN] -= _amount;
+
         // solhint-disable-next-line avoid-low-level-calls
         (bool success, ) = _receiver.call{value: _amount, gas: 21000}("");
         require(success, "LiquidityPools: transfer native token failed");
+    }
+
+    function deposit(address _token, uint256 _amount) external onlyERC20Bridge {
+        require(IERC20(_token).transferFrom(msg.sender, address(this), _amount), "IERC20: transfer failed");
+        availableLiquidity[_token] += _amount;
+    }
+
+    function depositNative(address _token, uint256 _amount) external payable onlyERC20Bridge {
+        // solhint-disable-next-line avoid-low-level-calls
+        (bool success, ) = address(this).call{value: _amount, gas: 21000}("");
+        require(success, "LiquidityPools: transfer native token failed");
+
+        availableLiquidity[_token] += _amount;
     }
 
     function distributeFee(address _token, uint256 _amount) external onlyFeeManager {
