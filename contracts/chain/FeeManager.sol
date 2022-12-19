@@ -8,6 +8,7 @@ import "./SignerOwnable.sol";
 import "./BridgeValidatorFeePool.sol";
 import "./LiquidityPools.sol";
 import "./Globals.sol";
+import "hardhat/console.sol";
 
 contract FeeManager is Initializable, Ownable, SignerOwnable {
     LiquidityPools public liquidityPools;
@@ -100,6 +101,12 @@ contract FeeManager is Initializable, Ownable, SignerOwnable {
         }
 
         liquidityPools.distributeFee(token, liquidityRewards);
+    }
+
+    function estimateDeposit(address token, uint256 amount) public view returns (uint256 depositAmount) {
+        depositAmount = ((amount + validatorRefundFee) * BASE_DIVISOR) / (BASE_DIVISOR - tokenFeePercentage[token]);
+
+        return depositAmount;
     }
 
     function calculateFee(address token, uint256 amount) public view returns (uint256 fee) {
