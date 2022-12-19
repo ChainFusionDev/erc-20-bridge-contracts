@@ -42,7 +42,6 @@ describe('FeeManager', function () {
     const [, foundation, receiver, user] = await ethers.getSigners();
     const amount = utils.parseEther('1');
     const tokenFee = utils.parseEther('0.01');
-    const fee = utils.parseEther('0.01');
     const validatorReward = utils.parseEther('0.3');
     const liquidityReward = utils.parseEther('0.3');
     const tokenLimit = utils.parseEther('0.1');
@@ -56,6 +55,7 @@ describe('FeeManager', function () {
     await tokenManager.setToken(NATIVE_TOKEN, 1);
     expect(await tokenManager.getType(NATIVE_TOKEN)).to.equal(1);
 
+    await feeManager.setTokenFee(NATIVE_TOKEN, tokenFee, validatorReward, liquidityReward);
     await bridgeValidatorFeePool.setLimitPerToken(NATIVE_TOKEN, tokenLimit);
 
     await liquidityPools.addNativeLiquidity({ value: amount });
@@ -63,14 +63,17 @@ describe('FeeManager', function () {
       value: amount,
     });
 
-    await feeManager.setTokenFee(NATIVE_TOKEN, tokenFee, validatorReward, liquidityReward);
+    const fee = await feeManager.calculateFee(NATIVE_TOKEN, amount);
+
+    const balance = await ethers.provider.getBalance(feeManager.address);
+    expect(balance).to.equal(fee);
+
+    const estimateDeposit = await feeManager.estimateDeposit(NATIVE_TOKEN, amount.sub(fee));
+    expect(amount).to.equal(estimateDeposit);
 
     const balanceValidatorFeePoolBefore = await ethers.provider.getBalance(bridgeValidatorFeePool.address);
     const balanceLiquidityPoolsBefore = await ethers.provider.getBalance(feeManager.liquidityPools());
     const balanceFoundationAddressBefore = await ethers.provider.getBalance(foundation.address);
-
-    const balance = await ethers.provider.getBalance(feeManager.address);
-    expect(balance).to.equal(fee);
 
     const userFeeManager = await ethers.getContractAt('FeeManager', feeManager.address, user);
     await userFeeManager.distributeRewards(NATIVE_TOKEN);
@@ -79,9 +82,9 @@ describe('FeeManager', function () {
     const balanceLiquidityPoolsAfter = await ethers.provider.getBalance(feeManager.liquidityPools());
     const balanceFoundationAddressAfter = await ethers.provider.getBalance(foundation.address);
 
-    let validatorRewards = utils.parseEther('0.003');
-    let liquidityRewards = utils.parseEther('0.003');
-    let foundationRewards = utils.parseEther('0.004');
+    let validatorRewards = utils.parseEther('0.006');
+    let liquidityRewards = utils.parseEther('0.006');
+    let foundationRewards = utils.parseEther('0.008');
 
     expect(balanceValidatorFeePoolAfter).to.equal(balanceValidatorFeePoolBefore.add(validatorRewards));
     expect(balanceLiquidityPoolsAfter).to.equal(balanceLiquidityPoolsBefore.add(liquidityRewards));
