@@ -102,6 +102,10 @@ contract FeeManager is Initializable, Ownable, SignerOwnable {
         liquidityPools.distributeFee(token, liquidityRewards);
     }
 
+    function estimateDeposit(address token, uint256 amount) public view returns (uint256 depositAmount) {
+        return ((amount + validatorRefundFee) * BASE_DIVISOR) / (BASE_DIVISOR - tokenFeePercentage[token]);
+    }
+
     function calculateFee(address token, uint256 amount) public view returns (uint256 fee) {
         fee = validatorRefundFee + (tokenFeePercentage[token] * amount) / BASE_DIVISOR;
 
