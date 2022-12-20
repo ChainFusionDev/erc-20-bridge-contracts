@@ -25,49 +25,56 @@ const config: HardhatUserConfig = {
   networks: {
     localhost: {
       chainId: 1337,
-      accounts: {
-        mnemonic: 'test test test test test test test test test test test junk'
-      },
-      gasPrice: 100000000000,
+      accounts,
     },
     ternopil: {
       chainId: 953842,
       url: 'https://rpc.chainfusion.org',
-      gasPrice: 10000000000,
       accounts,
     },
     bg1: {
       chainId: 5001,
       url: 'https://bg1-rpc.chainfusion.org',
-      gasPrice: 10000000000,
       accounts,
     },
     bg2: {
       chainId: 5002,
       url: 'https://bg2-rpc.chainfusion.org',
-      gasPrice: 10000000000,
       accounts,
     },
     bg3: {
       chainId: 5003,
       url: 'https://bg3-rpc.chainfusion.org',
-      gasPrice: 10000000000,
       accounts,
     },
-    ropsten: {
-      url: `https://ropsten.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
-      accounts,
-    },
-    kovan: {
-      url: `https://kovan.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
-      accounts,
-    },
-    rinkeby: {
-      url: `https://rinkeby.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
+    sepolia: {
+      chainId: 11155111,
+      url: 'https://rpc.sepolia.org',
       accounts,
     },
     goerli: {
+      chainId: 5,
       url: `https://goerli.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
+      accounts,
+    },
+    'bsc-testnet': {
+      chainId: 97,
+      url: 'https://data-seed-prebsc-1-s1.binance.org:8545',
+      accounts,
+    },
+    mumbai: {
+      chainId: 80001,
+      url: 'https://rpc-mumbai.maticvigil.com',
+      accounts,
+    },
+    fuji: {
+      chainId: 43113,
+      url: 'https://api.avax-test.network/ext/bc/C/rpc',
+      accounts,
+    },
+    'q-testnet': {
+      chainId: 35443,
+      url: 'https://rpc.qtestnet.org',
       accounts,
     },
   },
@@ -116,6 +123,54 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://bg3-explorer.chainfusion.org/api",
           browserURL: "https://bg3-explorer.chainfusion.org"
+        }
+      },
+      {
+        network: "sepolia",
+        chainId: 11155111,
+        urls: {
+          apiURL: "https://sepolia.etherscan.io/api",
+          browserURL: "https://sepolia.etherscan.io"
+        }
+      },
+      {
+        network: "goerli",
+        chainId: 5,
+        urls: {
+          apiURL: "https://goerli.etherscan.io/api",
+          browserURL: "https://goerli.etherscan.io"
+        }
+      },
+      {
+        network: "bsc-testnet",
+        chainId: 97,
+        urls: {
+          apiURL: "https://bscscan.com/api",
+          browserURL: "https://bscscan.com"
+        }
+      },
+      {
+        network: "mumbai",
+        chainId: 80001,
+        urls: {
+          apiURL: "https://mumbai.polygonscan.com/api",
+          browserURL: "https://mumbai.polygonscan.com"
+        }
+      },
+      {
+        network: 'fuji',
+        chainId: 43113,
+        urls: {
+          apiURL: "https://testnet.snowtrace.io/api",
+          browserURL: "https://testnet.snowtrace.io"
+        }
+      },
+      {
+        network: "q-testnet",
+        chainId: 35443,
+        urls: {
+          apiURL: "https://explorer.qtestnet.org/api",
+          browserURL: "https://explorer.qtestnet.org"
         }
       },
     ]
