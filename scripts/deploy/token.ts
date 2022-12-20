@@ -5,8 +5,8 @@ import { Token } from '../../typechain';
 import { Deployer } from './deployer';
 
 const defaultTokenDeploymentParameters: TokenDeploymentParameters = {
-  amount: ethers.utils.parseEther('10000'),
-  liquidityAmount: ethers.utils.parseEther('3000'),
+  amount: ethers.utils.parseEther('1000000'),
+  liquidityAmount: ethers.utils.parseEther('10000'),
   tokenFee: ethers.utils.parseEther('0.001'),
   tokenLimit: ethers.utils.parseEther('0.0001'),
   validatorReward: ethers.utils.parseEther('0.001'),
