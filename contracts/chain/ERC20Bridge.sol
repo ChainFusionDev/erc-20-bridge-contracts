@@ -118,7 +118,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         bytes memory data = abi.encode(nonce, msg.sender, _token, _receiver, transferAmount, fee);
 
         // solhint-disable-next-line check-send-result
-        relayBridge.send(_destinationChainId, block.gaslimit, data);
+        relayBridge.send(_destinationChainId, 500000, data);
 
         emit Deposited(nonce, msg.sender, _token, _destinationChainId, _receiver, _amount, fee);
 
@@ -194,7 +194,7 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         bytes memory data = abi.encode(nonce, msg.sender, NATIVE_TOKEN, _receiver, transferAmount, fee);
 
         // solhint-disable-next-line check-send-result
-        relayBridge.send(_destinationChainId, block.gaslimit, data);
+        relayBridge.send(_destinationChainId, 500000, data);
 
         emit DepositedNative(nonce, msg.sender, NATIVE_TOKEN, _destinationChainId, _receiver, _amount, fee);
 
