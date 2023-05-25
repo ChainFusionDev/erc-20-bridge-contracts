@@ -5,20 +5,25 @@ import { ERC20BridgeMediator, IBridgeApp, IBridgeAppFactory } from '../../typech
 
 const defaultSystemDeploymentParameters: SystemDeploymentParameters = {
   displayLogs: false,
+  parallelDeployment: false,
   verify: false,
 };
 
 export async function deploySystemContracts(options?: SystemDeploymentOptions): Promise<SystemDeploymentResult> {
   const params = resolveParameters(options);
-  const deployer = new Deployer(params.displayLogs);
+  const deployer = new Deployer(params.displayLogs, params.parallelDeployment);
 
-  deployer.log('Deploying contracts\n');
+  const [deployerSigner] = await ethers.getSigners();
+  const deployerAddress = await deployerSigner.getAddress();
+  deployer.setNonce(await ethers.provider.getTransactionCount(deployerAddress));
+
+  deployer.log(`🧾 Deploying ERC-20 Bridge contracts on ChainFusion (${network.name} chain)\n`);
 
   let res: SystemDeployment = {
     erc20BridgeMediator: await deployer.deploy(ethers.getContractFactory('ERC20BridgeMediator'), 'ERC20BridgeMediator'),
   };
 
-  deployer.log('Successfully deployed contracts\n');
+  deployer.log('Successfully deployed ERC-20 Bridge contracts on ChainFusion\n');
 
   if (network.name !== 'hardhat' && params.bridgeAppFactoryAddress !== undefined) {
     const bridgeAppFactory = await ethers.getContractAt('IBridgeAppFactory', params.bridgeAppFactoryAddress);
@@ -62,6 +67,10 @@ function resolveParameters(options?: SystemDeploymentOptions): SystemDeploymentP
     parameters.displayLogs = options.displayLogs;
   }
 
+  if (options.parallelDeployment !== undefined) {
+    parameters.parallelDeployment = options.parallelDeployment;
+  }
+
   if (options.verify !== undefined) {
     parameters.verify = options.verify;
   }
@@ -81,6 +90,7 @@ export interface SystemDeploymentParameters {
   bridgeAppFactoryAddress?: string;
 
   displayLogs: boolean;
+  parallelDeployment: boolean;
   verify: boolean;
 }
 
@@ -88,5 +98,6 @@ export interface SystemDeploymentOptions {
   bridgeAppFactoryAddress?: string;
 
   displayLogs?: boolean;
+  parallelDeployment?: boolean;
   verify?: boolean;
 }

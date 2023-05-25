@@ -7,7 +7,7 @@ async function main() {
   const contractsConfig = await readContractsConfig();
   const bridgeAppFactoryAddress = contractsConfig.bridgeAppFactory ?? process.env.BRIDGE_APP_FACTORY_ADDRESS;
 
-  const res = await deploySystemContracts({ displayLogs: true, verify, bridgeAppFactoryAddress });
+  const res = await deploySystemContracts({ displayLogs: true, parallelDeployment: true, verify, bridgeAppFactoryAddress });
   updateContractsConfig(contractsConfig, res);
   await writeContractsConfig(contractsConfig);
 }

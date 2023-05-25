@@ -3,11 +3,7 @@
 pragma solidity ^0.8.0;
 
 interface IRelayBridge {
-    function send(
-        uint256 destinationChain,
-        uint256 gasLimit,
-        bytes memory data
-    ) external payable;
+    function send(uint256 destinationChain, uint256 gasLimit, bytes memory data) external payable;
 
     function revertSend(
         address appContract,

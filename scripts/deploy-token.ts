@@ -1,5 +1,5 @@
 import { network } from 'hardhat';
-import { deployToken, setTokenToTokenManager, setTokenFee, addTokenToERC20BridgeMediator, setLimitPerToken, TokenDeploymentOptions, addLiquidity } from './deploy/token';
+import { deployToken, TokenDeploymentOptions } from './deploy/token';
 import {
   readChainContractsConfig,
   readContractsConfig,
@@ -19,6 +19,7 @@ async function main() {
 
     var options: TokenDeploymentOptions = {
       displayLogs: true,
+      parallelDeployment: true,
       privateKey: privateKey, 
       symbol: tokenSymbol, 
       name: tokenName, 
@@ -34,12 +35,6 @@ async function main() {
 
     addTokenToContractsConfig(contractsChainConfig, tokenSymbol, token.address);
     await writeChainContractsConfig(chainId, contractsChainConfig);
-
-    await setTokenToTokenManager(token.address, options);
-    await setTokenFee(token.address, options);
-    await setLimitPerToken(token.address, options);
-    await addTokenToERC20BridgeMediator(token.address, options);
-    await addLiquidity(token, options);
 }
 
 main().catch((error) => {

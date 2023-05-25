@@ -64,19 +64,14 @@ contract LiquidityPools is Initializable, Ownable, SignerOwnable {
         _setFeePercentage(_feePercentage);
     }
 
-    function transfer(
-        address _token,
-        address _receiver,
-        uint256 _transferAmount
-    ) external onlyERC20Bridge {
+    function transfer(address _token, address _receiver, uint256 _transferAmount) external onlyERC20Bridge {
         require(
             IERC20(_token).balanceOf(address(this)) >= _transferAmount,
             "IERC20: amount more than contract balance"
         );
 
-        require(ERC20(_token).transfer(_receiver, _transferAmount), "ERC20: transfer failed");
-
         availableLiquidity[_token] -= _transferAmount;
+        require(ERC20(_token).transfer(_receiver, _transferAmount), "ERC20: transfer failed");
     }
 
     function transferNative(address _receiver, uint256 _amount) external onlyERC20Bridge {

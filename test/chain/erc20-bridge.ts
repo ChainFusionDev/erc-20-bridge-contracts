@@ -36,7 +36,7 @@ describe('ERC20Bridge', function () {
     const { mockChainId, mockToken, erc20Bridge, liquidityPools, mockRelayBridge, feeManager } =
       await deployBridgeWithMocks();
     const sourceChain = network.config.chainId;
-    const gasLimit = (await ethers.provider.getBlock(0)).gasLimit;
+    const gasLimit = 500000;
     const nonce = 0;
 
     await mockToken.approve(erc20Bridge.address, depositAmount);
@@ -75,7 +75,7 @@ describe('ERC20Bridge', function () {
     const transferAmount = utils.parseEther('0.99');
     const NATIVE_TOKEN = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
     const sourceChainId = network.config.chainId;
-    const gasLimit = (await ethers.provider.getBlock(0)).gasLimit;
+    const gasLimit = 500000;
     const nonce = 0;
     const mintNonce = 1;
     const nativeNonce = 2;

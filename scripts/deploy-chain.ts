@@ -20,6 +20,7 @@ async function main() {
 
   const res = await deployBridgeContracts({
     displayLogs: true,
+    parallelDeployment: true,
     setApp: true,
     privateKey,
     homeNetwork,
