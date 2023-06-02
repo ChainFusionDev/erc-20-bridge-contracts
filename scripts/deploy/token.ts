@@ -94,7 +94,11 @@ export async function deployToken(options: TokenDeploymentOptions): Promise<Toke
 
   await deployer.waitPromises(pendingTxs);
 
-  if (options.homeNetwork !== undefined && options.erc20BridgeMediatorAddress !== undefined) {
+  if (
+    options.homeNetwork !== undefined &&
+    options.erc20BridgeMediatorAddress !== undefined &&
+    network.name !== 'hardhat'
+  ) {
     const networkConfig = config.networks[options.homeNetwork] as HttpNetworkConfig;
     const homeProvider = new ethers.providers.JsonRpcProvider(networkConfig.url, networkConfig.chainId);
     const homeSigner = new ethers.Wallet(options.privateKey, homeProvider);

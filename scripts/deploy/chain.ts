@@ -1,5 +1,5 @@
 import { BigNumber } from 'ethers';
-import { ethers, network as hhnet, config, network } from 'hardhat';
+import { ethers, config, network } from 'hardhat';
 import { HttpNetworkConfig } from 'hardhat/types';
 import {
   ERC20Bridge,
@@ -38,9 +38,9 @@ export async function deployBridgeContracts(options?: BridgeDeploymentOptions): 
   const deployerAddress = await deployerSigner.getAddress();
   deployer.setNonce(await ethers.provider.getTransactionCount(deployerAddress));
 
-  if (hhnet.name === 'hardhat') {
+  if (network.name === 'hardhat') {
     const signerStorage = await deployer.deploy(ethers.getContractFactory('MockSignerStorage'), 'SignerStorage');
-    await signerStorage.initialize(validator.address);
+    await (await signerStorage.initialize(validator.address, deployer.getOverrides())).wait();
 
     params.signerStorage = signerStorage.address;
   }
@@ -117,16 +117,21 @@ export async function deployBridgeContracts(options?: BridgeDeploymentOptions): 
     ),
   ]);
 
-  if (params.setApp && options?.homeNetwork !== undefined && options.privateKey !== undefined) {
+  if (
+    params.setApp &&
+    options?.homeNetwork !== undefined &&
+    options.privateKey !== undefined &&
+    network.name !== 'hardhat'
+  ) {
     const networkConfig = config.networks[options.homeNetwork] as HttpNetworkConfig;
     const homeProvider = new ethers.providers.JsonRpcProvider(networkConfig.url, networkConfig.chainId);
     const homeSigner = new ethers.Wallet(options.privateKey, homeProvider);
 
-    if (hhnet.config.chainId !== undefined) {
+    if (network.config.chainId !== undefined) {
       const bridgeApp = IBridgeApp__factory.connect(params.bridgeApp, homeSigner);
 
       await deployer.sendTransaction(
-        bridgeApp.setContractAddress(hhnet.config.chainId, res.erc20Bridge.address),
+        bridgeApp.setContractAddress(network.config.chainId, res.erc20Bridge.address),
         'Setting bridge address in BridgeApp'
       );
     }
