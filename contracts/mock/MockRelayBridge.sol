@@ -29,7 +29,11 @@ contract MockRelayBridge is IRelayBridge {
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 
-    function send(uint256 destinationChainId, uint256 gasLimit, bytes memory data) external payable {
+    function send(
+        uint256 destinationChainId,
+        uint256 gasLimit,
+        bytes memory data
+    ) external payable {
         bytes32 hash = dataHash(msg.sender, block.chainid, destinationChainId, gasLimit, data, nonce);
         require(sentData[hash].length == 0, "RelayBridge: data already send");
 

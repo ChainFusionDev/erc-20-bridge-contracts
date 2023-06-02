@@ -134,10 +134,15 @@ contract FeeManager is Initializable, Ownable, SignerOwnable {
         emit ValidatorRefundFeeUpdated(_validatorRefundFee);
     }
 
-    function _calculateRewards(
-        address token,
-        uint256 totalRewards
-    ) private view returns (uint256 validatorRewards, uint256 liquidityRewards, uint256 foundationRewards) {
+    function _calculateRewards(address token, uint256 totalRewards)
+        private
+        view
+        returns (
+            uint256 validatorRewards,
+            uint256 liquidityRewards,
+            uint256 foundationRewards
+        )
+    {
         validatorRewards = (validatorRewardPercentage[token] * totalRewards) / BASE_DIVISOR;
         liquidityRewards = (liquidityRewardPercentage[token] * totalRewards) / BASE_DIVISOR;
         foundationRewards = totalRewards - validatorRewards - liquidityRewards;

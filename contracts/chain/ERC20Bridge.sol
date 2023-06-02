@@ -88,7 +88,12 @@ contract ERC20Bridge is Initializable, SignerOwnable {
         relayBridge = IRelayBridge(_relayBridge);
     }
 
-    function deposit(address _token, uint256 _destinationChainId, address _receiver, uint256 _amount) external {
+    function deposit(
+        address _token,
+        uint256 _destinationChainId,
+        address _receiver,
+        uint256 _amount
+    ) external {
         require(_destinationChainId != block.chainid, "ERC20Bridge: cannot deposit on the same chain ID");
         require(_amount != 0, "ERC20Bridge: amount cannot be equal to 0");
         require(tokenManager.getType(_token) != TokenType.DISABLED, "TokenManager: token is not enabled");

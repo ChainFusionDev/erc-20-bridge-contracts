@@ -7,10 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IERC20MintableBurnable.sol";
 
 contract MockMintableBurnableToken is ERC20, IERC20MintableBurnable, ERC20Burnable, Ownable {
-    constructor(
-        string memory name,
-        string memory symbol
-    )
+    constructor(string memory name, string memory symbol)
         ERC20(name, symbol) // solhint-disable-next-line no-empty-blocks
     {}
 
