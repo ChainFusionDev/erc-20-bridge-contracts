@@ -19,7 +19,7 @@ async function main() {
 
     var options: TokenDeploymentOptions = {
       displayLogs: true,
-      parallelDeployment: true,
+      parallelDeployment: false,
       privateKey: privateKey, 
       symbol: tokenSymbol, 
       name: tokenName, 
